@@ -20,6 +20,22 @@
 
 ## Active bugs
 
+### BUG-006 — [P1] AltStore install fails with `NSCocoaErrorDomain 3840`: "the given data was not valid JSON"
+
+- **Found in:** TASK-015 attempt #3 (2026-05-24)
+- **Misdirection:** Initially diagnosed as IPA signing issue (BUG-004, BUG-005) because the error wording "data couldn't be read in the correct format" sounded like IPA validation. Joe's screenshot of "More details → Debug description: the given data was not valid JSON" revealed it was actually a JSON parse error on the source manifest, not the IPA.
+- **Multiple causes (any one likely sufficient to break decode):**
+  - `iconURL` pointed at a path in the repo that doesn't exist yet — AltStore fetched it, got HTML 404, then somewhere downstream got a JSON parse error
+  - `screenshotURLs` used the legacy v1 field name; v2 spec calls it `screenshots`
+  - `permissions` was an array-of-objects in v1; v2 spec calls it `appPermissions` and the value is a dictionary mapping `*UsageDescription` keys to strings
+  - Version object missing `buildVersion` (required per v2 spec)
+  - Version object had legacy `size: 0` field not in v2 spec
+- **Fix:** Full v2-compliant rewrite of `altstore-source.json`. Using `https://github.com/joehill-techprojects.png` as placeholder iconURL until TASK-060 generates a real app icon.
+- **Status:** FIXED — commit pending.
+- **Lesson:** Read the docs before writing the artifact. The plan's `altstore-source.json` template was based on stale v1 schema knowledge.
+
+---
+
 ### BUG-005 — [P1] xcodebuild archive rejects `CODE_SIGN_IDENTITY="-"`: "Ad Hoc code signing is not allowed with SDK 'iOS 18.5'"
 
 - **Found in:** TASK-015, attempt #2 (2026-05-24)
