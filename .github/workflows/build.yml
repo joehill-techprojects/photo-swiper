@@ -3,6 +3,12 @@ name: Build
 on:
   push:
     branches: [main]
+    # Don't rebuild for docs/manifest-only changes — keeps direct release
+    # URLs in altstore-source.json from going stale on every commit.
+    paths-ignore:
+      - "altstore-source.json"
+      - "**/*.md"
+      - "docs/**"
   pull_request:
   workflow_dispatch:
 
