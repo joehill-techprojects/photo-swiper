@@ -44,7 +44,8 @@
 - [x] **H-020** — Tested Hello World IPA + Phase 2 IPA on Joe's phone. *Done 2026-05-24. Phase 2 acceptance passed.*
 - [ ] **H-021** — Confirm Immich URL + generate an API key on the Immich web UI. Paste both into the agent's chat. *Triggered by: TASK-040 (Phase 4)*
 - [ ] **H-022** — Manual testing of the full swipe loop on Joe's phone before Jill onboards. *Triggered by: TASK-065 (Phase 5)*
-- [ ] **H-030** — Test Phase 3 IPA on Joe's phone (delete / share / undo / skip). iOS will show a system confirmation when left-swipe deletes — verify that flow feels right before we trust it. *Triggered by: TASK-037 (Phase 3)*
+- [x] **H-030** — Test Phase 3 IPA on Joe's phone (delete / share / undo / skip). *Done 2026-05-24. Surfaced D-024: confirmation tap is unacceptable at 50K-photo scale, and undo didn't actually undelete. Refactor scheduled as TASK-100..106.*
+- [ ] **H-031** — Test Phase 3.1 IPA (trash-bucket model). Verify: left swipe silent, badge counts up, undo keeps photo in library, batch commit shows ONE iOS prompt, app-quit-then-relaunch preserves bucket. *Triggered by: TASK-106*
 
 ---
 

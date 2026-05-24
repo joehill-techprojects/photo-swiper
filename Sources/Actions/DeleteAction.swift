@@ -2,33 +2,35 @@
 //  DeleteAction.swift
 //  PhotoSwiper
 //
-//  Stateless namespace that deletes a single `PHAsset` from the user's
-//  iOS photo library.
+//  Stateless namespace that deletes a batch of `PHAsset`s from the user's
+//  iOS photo library in a single PhotoKit call.
 //
 //  Behaviour notes:
-//  - Wraps `PHPhotoLibrary.shared().performChanges` around a
-//    `PHAssetChangeRequest.deleteAssets` call. iOS itself surfaces the
-//    "Are you sure you want to delete this photo?" system confirmation
-//    sheet — that IS the in-app safety net for left-swipes. Per
-//    `DECISIONS.md` D-018 (non-blocking failure UX) and the error policy
-//    in `docs/architecture.md`, we do NOT add another confirmation layer
-//    on top of it.
+//  - Wraps `PHPhotoLibrary.shared().performChanges` around a single
+//    `PHAssetChangeRequest.deleteAssets` call with the entire batch. iOS
+//    surfaces ONE "Are you sure you want to delete N photos?" system
+//    confirmation sheet for the whole batch — that IS the in-app safety
+//    net for left-swipes. Per `DECISIONS.md` D-018 (non-blocking failure
+//    UX) and the error policy in `docs/architecture.md`, we do NOT add
+//    another confirmation layer on top of it.
 //  - The PhotoKit API is completion-handler based; we bridge it to
 //    `async/await` with `withCheckedThrowingContinuation`.
 //  - If the user taps "Cancel" on the system confirmation, PhotoKit
 //    invokes the completion with `success=false` and an error whose
 //    domain/code corresponds to `PHPhotosError.userCancelled`. We map
-//    that to `DeleteError.userCancelled` so the caller (the swipe
-//    handler in `AppState`) can distinguish "user backed out" from
-//    "actual failure" and skip the `UndoStack` push in that case.
+//    that to `DeleteError.userCancelled` so the caller can distinguish
+//    "user backed out" from "actual failure". In that case the batch is
+//    preserved in `PendingDeleteStore` and the user can retry — nothing
+//    is lost.
 //  - All other failures surface as `DeleteError.failed(underlying:)`.
 //
 //  Per `DECISIONS.md`:
 //    - D-009  PhotoKit only (no third-party photo libs)
 //    - D-017  os.Logger for structured logging
 //    - D-018  non-blocking failure UX (rely on the system prompt)
+//    - D-024  batched-delete commit (one prompt for the whole bucket)
 //
-//  Phase 3 scope (TASK-030).
+//  Phase 3 scope (TASK-030, refactored to batch in TASK-102 per D-024).
 //
 
 import Foundation
@@ -58,25 +60,30 @@ public enum DeleteAction {
         category: "DeleteAction"
     )
 
-    /// Delete a single asset from the user's photo library.
+    /// Delete a batch of assets from the user's photo library in a
+    /// single PhotoKit transaction.
     ///
-    /// iOS shows its own confirmation sheet before the deletion commits;
-    /// this function returns only once the user has either confirmed or
+    /// iOS shows ONE confirmation sheet for the whole batch; this
+    /// function returns only once the user has either confirmed or
     /// cancelled that sheet.
     ///
-    /// - Parameter asset: The `PHAsset` to delete.
+    /// - Parameter assets: The `PHAsset`s to delete. If empty, this is
+    ///   a no-op and PhotoKit is not called.
     /// - Throws:
     ///   - `DeleteError.userCancelled` if the user tapped Cancel.
     ///   - `DeleteError.failed(underlying:)` for any other PhotoKit error.
-    public static func delete(_ asset: PHAsset) async throws {
-        Self.log.info(
-            "delete entry asset=\(asset.localIdentifier, privacy: .public)"
-        )
+    public static func delete(_ assets: [PHAsset]) async throws {
+        guard !assets.isEmpty else {
+            Self.log.debug("delete called with empty array; no-op")
+            return
+        }
+
+        Self.log.info("delete entry count=\(assets.count)")
 
         do {
             try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
                 PHPhotoLibrary.shared().performChanges {
-                    PHAssetChangeRequest.deleteAssets([asset] as NSArray)
+                    PHAssetChangeRequest.deleteAssets(assets as NSArray)
                 } completionHandler: { success, error in
                     if success {
                         continuation.resume(returning: ())
@@ -101,13 +108,11 @@ public enum DeleteAction {
                 }
             }
 
-            Self.log.info(
-                "delete success asset=\(asset.localIdentifier, privacy: .public)"
-            )
+            Self.log.info("delete success count=\(assets.count)")
         } catch let deleteError as DeleteError {
             // Defensive re-throw — covers the synthetic "no error" case above.
             Self.log.error(
-                "delete failed asset=\(asset.localIdentifier, privacy: .public) error=\(String(describing: deleteError), privacy: .public)"
+                "delete failed count=\(assets.count) error=\(String(describing: deleteError), privacy: .public)"
             )
             throw deleteError
         } catch {
@@ -117,14 +122,12 @@ public enum DeleteAction {
             let nsError = error as NSError
             if nsError.domain == PHPhotosErrorDomain,
                nsError.code == PHPhotosError.userCancelled.rawValue {
-                Self.log.info(
-                    "delete user-cancelled asset=\(asset.localIdentifier, privacy: .public)"
-                )
+                Self.log.info("delete user-cancelled count=\(assets.count)")
                 throw DeleteError.userCancelled
             }
 
             Self.log.error(
-                "delete failed asset=\(asset.localIdentifier, privacy: .public) error=\(String(describing: error), privacy: .public)"
+                "delete failed count=\(assets.count) error=\(String(describing: error), privacy: .public)"
             )
             throw DeleteError.failed(underlying: error)
         }

@@ -9,6 +9,10 @@
 //
 //  Responsibilities:
 //    - Owns `Settings` (deck order, Immich URL, age threshold).
+//    - Owns `UndoStack` (LIFO of reverse closures for the undo button).
+//    - Owns `PendingDeleteStore` — bucket of left-swiped assets queued for
+//      batch deletion (D-024). Left swipes park here; the user commits the
+//      whole bucket via the trash toolbar button.
 //    - Owns the lazily-created `AsyncStream<PHAsset>.AsyncIterator` produced
 //      by `PhotoFetcher`. Re-created on order changes via `reloadOrder()`.
 //    - Maintains `cards: [PHAsset]` — the small ring of upcoming cards that
@@ -20,13 +24,17 @@
 //  Phase 3 scope (this file):
 //    - `loadInitial()` and `reloadOrder()` drive the iterator;
 //      `reloadOrder()` also clears the undo stack (its entries reference
-//      assets from the previous order).
-//    - `handleSwipe(asset:direction:)` dispatches `DeleteAction` on left,
+//      assets from the previous order). The pending-delete bucket survives
+//      order changes — the user expects "I queued N photos for delete;
+//      switching to oldest-first shouldn't lose them".
+//    - `handleSwipe(asset:direction:)` parks left-swipes in
+//      `pendingDelete` (D-024 — no PhotoKit call yet), dispatches
 //      `ShareAction` on up, a placeholder log on right (Phase 4 swaps in
 //      `ImmichClient.upload` via TASK-046), and a skip log on down (D-022).
-//      Each branch pushes a reverse closure onto `undoStack`, except on
-//      `DeleteError.userCancelled` (benign no-op) and other failures
-//      (which restore the card so the user can retry).
+//      Each branch pushes a reverse closure onto `undoStack`.
+//    - `commitPendingDelete()` hands the whole bucket to PhotoKit in one
+//      call (one iOS confirmation for N photos). `discardPendingDelete()`
+//      empties the bucket without deleting anything.
 //    - `undo()` pops the most-recent reverse closure for the toolbar button.
 //
 //  Per `DECISIONS.md`:
@@ -34,6 +42,7 @@
 //    - D-004  SwiftUI only
 //    - D-009  PhotoKit only
 //    - D-017  os.Logger
+//    - D-024  batched delete bucket + single iOS confirmation
 //
 
 import Foundation
@@ -60,6 +69,11 @@ public final class AppState {
     /// `handleSwipe` (except on benign no-ops like delete-cancel); popped by
     /// `undo()` from the toolbar button in `ContentView`.
     public let undoStack: UndoStack
+
+    /// Batched pending-delete bucket (D-024). Left swipes park assets here;
+    /// `commitPendingDelete()` hands the whole bucket to PhotoKit in a
+    /// single `performChanges` call (one iOS confirmation for N photos).
+    public let pendingDelete: PendingDeleteStore
 
     // MARK: - Public deck state (read-only to the outside)
 
@@ -113,15 +127,19 @@ public final class AppState {
     ///   - undoStack: The undo stack. Same nil-sentinel pattern as `settings`
     ///     (BUG-008): `UndoStack.init` is `@MainActor`-isolated so we can't
     ///     name `UndoStack()` as a default-parameter expression.
+    ///   - pendingDelete: The batched-delete bucket. Same nil-sentinel pattern
+    ///     (BUG-008): `PendingDeleteStore.init` is `@MainActor`-isolated.
     ///   - fetcher: The `PhotoFetcher` used to produce the asset stream.
     ///     Injectable for tests; defaults to the production fetcher.
     public init(
         settings: Settings? = nil,
         undoStack: UndoStack? = nil,
+        pendingDelete: PendingDeleteStore? = nil,
         fetcher: PhotoFetcher = PhotoFetcher()
     ) {
         self.settings = settings ?? Settings()
         self.undoStack = undoStack ?? UndoStack()
+        self.pendingDelete = pendingDelete ?? PendingDeleteStore()
         self.fetcher = fetcher
     }
 
@@ -203,16 +221,18 @@ public final class AppState {
     /// Removes the asset from `cards` immediately (so the UI updates without
     /// waiting on the async action), then dispatches the matching action
     /// per direction:
-    ///   - `.left`  → `DeleteAction.delete` (iOS shows confirmation sheet)
+    ///   - `.left`  → park in `pendingDelete` bucket (D-024); no PhotoKit
+    ///                call here — the user batch-commits later via the trash
+    ///                toolbar button
     ///   - `.right` → Phase 3 placeholder log; Phase 4 (TASK-046) swaps in
     ///                `ImmichClient.upload`
     ///   - `.up`    → `ShareAction.share` (iOS share sheet)
     ///   - `.down`  → skip (D-022, no side effect)
     ///
-    /// On success, pushes a reverse closure onto `undoStack` that restores
-    /// the asset at the top of the deck. On `DeleteError.userCancelled`
-    /// (benign no-op), the card is restored and NO undo entry is pushed.
-    /// On other failures, the card is also restored so the user can retry.
+    /// Every direction pushes a reverse closure onto `undoStack` so the
+    /// toolbar undo button restores the card. The `.left` reverse closure
+    /// also removes the asset from `pendingDelete` so undo is real — the
+    /// photo never left the user's library.
     public func handleSwipe(asset: PHAsset, direction: Direction) async {
         Self.log.info(
             "handleSwipe direction=\(String(describing: direction), privacy: .public) asset=\(asset.localIdentifier, privacy: .public)"
@@ -232,22 +252,14 @@ public final class AppState {
 
         switch direction {
         case .left:
-            do {
-                try await DeleteAction.delete(asset)
-                // On success the photo is in iOS Recently Deleted; undo just
-                // restores the card to the deck (we can't programmatically
-                // un-delete, that's the user's safety net).
-                undoStack.push { [weak self] in
-                    await self?.restore(asset)
-                }
-            } catch DeleteError.userCancelled {
-                // User backed out of the iOS confirmation. The card is already
-                // removed from view; restore it so the swipe was a no-op.
-                await restore(asset)
-            } catch {
-                Self.log.error("delete failed: \(String(describing: error), privacy: .public)")
-                // Photo wasn't deleted; restore the card so user can retry.
-                await restore(asset)
+            // D-024: park in the pending-delete bucket. PhotoKit is NOT
+            // called here — `commitPendingDelete()` handles the whole batch
+            // in one call with a single iOS confirmation sheet.
+            pendingDelete.add(asset)
+            undoStack.push { [weak self] in
+                guard let self else { return }
+                self.pendingDelete.remove(matching: asset.localIdentifier)
+                await self.restore(asset)
             }
 
         case .right:
@@ -286,6 +298,54 @@ public final class AppState {
     /// Convenience for the toolbar undo button in `ContentView`.
     public func undo() async {
         await undoStack.pop()
+    }
+
+    // MARK: - Batched delete (D-024)
+
+    /// Commit all pending-delete assets in a single PhotoKit batch.
+    /// iOS shows ONE confirmation sheet for the whole batch. On success,
+    /// the bucket is cleared. On user-cancel, the bucket is preserved
+    /// so the user can retry. On other failure, the bucket is preserved
+    /// and the error is logged.
+    ///
+    /// Also clears the undo stack on success — those reverse closures
+    /// reference assets now in Recently Deleted; restoring their cards
+    /// would show broken thumbnails.
+    public func commitPendingDelete() async {
+        let snapshot = pendingDelete.assets
+        guard !snapshot.isEmpty else {
+            Self.log.debug("commitPendingDelete called with empty bucket; no-op")
+            return
+        }
+
+        Self.log.info("commitPendingDelete count=\(snapshot.count, privacy: .public)")
+        do {
+            try await DeleteAction.delete(snapshot)
+            pendingDelete.clear()
+            undoStack.clear()
+            Self.log.info("commitPendingDelete success")
+        } catch DeleteError.userCancelled {
+            Self.log.info("commitPendingDelete user-cancelled; bucket preserved")
+        } catch {
+            Self.log.error("commitPendingDelete failed: \(String(describing: error), privacy: .public); bucket preserved")
+        }
+    }
+
+    /// Discard the pending-delete bucket without deleting any photos.
+    /// The photos stay in the user's library. Also drops any UndoStack
+    /// entries that referenced these assets — actually, simplest: drop
+    /// the entire UndoStack since the cards being undone may already be
+    /// off-deck.
+    ///
+    /// (Edge case: a user with mixed swipes — left, right, up — taps
+    /// Discard. We clear the bucket and the undo stack. The right and
+    /// up swipes are "stuck off-deck" but those actions either did
+    /// nothing real (right placeholder) or already happened (up share
+    /// sheet shown). Acceptable.)
+    public func discardPendingDelete() {
+        Self.log.info("discardPendingDelete count=\(self.pendingDelete.count, privacy: .public)")
+        pendingDelete.clear()
+        undoStack.clear()
     }
 
     // MARK: - Private helpers

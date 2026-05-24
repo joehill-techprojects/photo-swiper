@@ -59,7 +59,17 @@
 - [x] **TASK-034** — Wire left-swipe in `CardStack` → `DeleteAction` + push to `UndoStack`. *Done 2026-05-24. Integration subagent. `userCancelled` restores card without undo entry; other errors restore + log.*
 - [x] **TASK-035** — Wire up-swipe → `ShareAction` + push to `UndoStack`. *Done 2026-05-24. Integration subagent. Undo pushed once share sheet appears regardless of whether user actually sends (per ShareAction's contract).*
 - [x] **TASK-036** — Add undo button to the UI, wire to `UndoStack.pop`. *Done 2026-05-24. Integration subagent. Leading toolbar item (`arrow.uturn.backward.circle`), disabled when undoStack.isEmpty.*
-- [ ] **TASK-037** — Manual test: each gesture works on Joe's phone, undo works. *Depends TASK-034..036, TASK-038, TASK-039. Tracked as H-030.*
+- [~] **TASK-037** — Manual test: each gesture works on Joe's phone, undo works. *Joe's first test 2026-05-24 surfaced D-024 (delete model rework). Re-test required after TASK-100..104 ship. Tracked as H-030.*
+
+### Phase 3.1 — Trash-bucket delete model (D-024)
+
+- [x] **TASK-100** — Author `Sources/State/PendingDeleteStore.swift` — `@MainActor @Observable` bucket. *Done 2026-05-24. UserDefaults key `PhotoSwiper.PendingDelete.identifiers`; persist on every mutation; init re-fetches via `PHAsset.fetchAssets(withLocalIdentifiers:options:)` and silently drops unresolvable IDs.*
+- [x] **TASK-101** — `PendingDeleteStoreTests.swift`. *Done 2026-05-24. 5 tests covering empty-init, stale-ID init, clear-writes-empty, idempotent clear, key constant stability. PHAsset stubbing skipped — only the persistence layer is tested since real PHAsset can't be constructed in unit tests.*
+- [x] **TASK-102** — Refactor `DeleteAction.delete(_:)` to take `[PHAsset]`. *Done 2026-05-24. Empty array short-circuits; non-empty hands `NSArray` to `deleteAssets` for ONE iOS prompt covering the batch.*
+- [x] **TASK-103** — Refactor `AppState.handleSwipe` left branch. *Done 2026-05-24. `.left` parks in `pendingDelete` + pushes undo closure that removes from bucket. Added `commitPendingDelete()` (clears bucket + undoStack on success; preserves on cancel/error) and `discardPendingDelete()` (clears both).*
+- [x] **TASK-104** — `ContentView` trash toolbar item with badge + confirmationDialog. *Done 2026-05-24. Red capsule count badge overlay on `trash` SF Symbol; `.confirmationDialog` with Delete (destructive) / Discard (destructive) / Cancel.*
+- [~] **TASK-105** — Bump to `0.1.3` / build `4`, ship IPA, update altstore-source.json. *In progress 2026-05-24.*
+- [ ] **TASK-106** — Re-test on Joe's phone (TASK-037 re-do). Verify: left swipe queues silently, badge increments, undo actually keeps photo in library, batch commit shows ONE iOS prompt, app-quit-then-relaunch preserves bucket. *Tracked as H-031.*
 - [x] **TASK-038** — Add `.down` to `SwipeCard.Direction` enum, update `directionForCommit` to detect downward swipes past threshold, add a gray "snooze" hint overlay. Wire AppState to handle `.down` as a no-op skip (just remove from deck, log skipped). Per D-022. *Done 2026-05-24. Part 1 (SwipeCard) inline; part 2 (AppState) via integration subagent.*
 - [x] **TASK-039** — Wire `.right` swipe in `AppState.handleSwipe` to a placeholder log (no real action yet — Phase 4 swaps in `ImmichClient.upload`). Card removes from deck as usual. Avoids "right does nothing visible" feeling weird in Phase 3 testing. *Done 2026-05-24. Integration subagent. Per D-023.*
 

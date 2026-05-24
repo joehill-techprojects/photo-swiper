@@ -36,6 +36,9 @@ struct ContentView: View {
     /// Drives the settings `.sheet` presentation.
     @State private var showingSettings = false
 
+    /// Drives the batched-delete `.confirmationDialog` presentation (D-024).
+    @State private var showingDeleteSheet = false
+
     var body: some View {
         NavigationStack {
             content
@@ -54,12 +57,50 @@ struct ContentView: View {
                     }
                     ToolbarItem(placement: .topBarTrailing) {
                         Button {
+                            showingDeleteSheet = true
+                        } label: {
+                            Image(systemName: "trash")
+                                .overlay(alignment: .topTrailing) {
+                                    if !appState.pendingDelete.isEmpty {
+                                        Text("\(appState.pendingDelete.count)")
+                                            .font(.system(size: 10, weight: .bold))
+                                            .padding(.horizontal, 4)
+                                            .padding(.vertical, 1)
+                                            .background(Color.red, in: Capsule())
+                                            .foregroundStyle(.white)
+                                            .offset(x: 8, y: -8)
+                                    }
+                                }
+                        }
+                        .disabled(appState.pendingDelete.isEmpty)
+                        .accessibilityLabel("Pending deletes: \(appState.pendingDelete.count)")
+                    }
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button {
                             showingSettings = true
                         } label: {
                             Image(systemName: "gearshape")
                         }
                         .accessibilityLabel("Settings")
                     }
+                }
+                .confirmationDialog(
+                    "Delete \(appState.pendingDelete.count) photos?",
+                    isPresented: $showingDeleteSheet,
+                    titleVisibility: .visible
+                ) {
+                    Button("Delete \(appState.pendingDelete.count) photos", role: .destructive) {
+                        Task { await appState.commitPendingDelete() }
+                    }
+                    // `.destructive` on Discard is intentional: it also throws
+                    // away undo history, which is destructive in the UndoStack
+                    // sense. SwiftUI surfaces both destructive buttons in red.
+                    Button("Discard pending", role: .destructive) {
+                        appState.discardPendingDelete()
+                    }
+                    Button("Cancel", role: .cancel) { }
+                } message: {
+                    Text("iOS will show its own confirmation next. Tap Delete there to send them to Recently Deleted (recoverable for 30 days). Tap Discard to keep the photos in your library and empty the queue.")
                 }
                 .sheet(isPresented: $showingSettings, onDismiss: {
                     // Re-fetch with the (possibly) new order. Cheap enough

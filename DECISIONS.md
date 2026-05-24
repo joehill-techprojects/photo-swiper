@@ -107,3 +107,30 @@ Implementation in TASK-038: extend `SwipeCard.Direction` enum with `.down`, upda
 ### D-023 — Right swipe in Phase 3 = placeholder log (no real upload)
 
 `ImmichClient.upload` lands in Phase 4. Until then, right swipe in Phase 3 mirrors down — log "would upload" and remove from deck — rather than leaving right swipe as a silent no-op. Otherwise testing Phase 3 with three different-feeling directions (left destructive, up shares, right & down silent) is unnecessarily confusing.
+
+---
+
+## 2026-05-24 — Phase 3 retrospective decisions
+
+### D-024 — Left swipe = "queue for batch delete" (not immediate delete)
+
+Joe's Phase 3 test (TASK-037) surfaced two product problems:
+
+1. **Undo didn't actually undelete the photo** — the original design (D-018 implied) treated the iOS confirmation sheet as the safety net and undo just restored the card to the deck. The photo was already in Recently Deleted; undo only un-removed the card. User-hostile.
+2. **iOS demands a confirmation tap per `PHAssetChangeRequest.deleteAssets` call.** That's an Apple privacy guarantee — no third-party app can bypass it. At 50K photos × N% delete rate, tapping confirm 30,000 times destroys the value prop ("don't make me tap").
+
+**Resolution: switch to a "pending delete" bucket model.** PhotoKit's `deleteAssets` accepts an `NSArray` of N assets and shows **one** confirmation for the whole batch. We exploit that.
+
+- Left swipe → asset goes into in-memory `PendingDeleteStore`. Card leaves the deck. **No iOS prompt fires.**
+- Undo → asset comes back out of the bucket and onto the top of the deck. Photo never left the library — undo is real.
+- New toolbar trash badge `🗑 N` shows the pending count. Disabled when empty.
+- Tap the badge → action sheet: "Delete N photos" (destructive) / "Discard pending" / Cancel.
+- "Delete" calls `PHAssetChangeRequest.deleteAssets(pendingArray as NSArray)` → iOS shows ONE prompt → on confirm, all N go to Recently Deleted; on cancel, bucket stays intact for retry.
+- "Discard pending" empties the bucket; photos stay in library.
+- The bucket is **persisted to UserDefaults** as an array of `localIdentifier` strings, so an impromptu app quit doesn't lose pending deletes. On launch, identifiers that no longer resolve (manually deleted in Photos.app, etc.) are silently dropped.
+
+Why not auto-commit on app background, or at a threshold count? Backgrounding is involuntary too often (calls, notifications, swipe-up), and an iOS prompt can't appear while the app isn't foregrounded. Threshold-based auto-prompt interrupts swipe flow. Manual control with persistence is the right floor.
+
+Right / up / down swipes are unaffected — those undo paths (D-022, D-023, share) still just push reverse closures onto `UndoStack`.
+
+**Supersedes** the relevant portion of D-018's "rely on the system prompt" implication for the left swipe. D-018 still governs error-toast UX for failed actions (upload retry, share failure, etc.).
