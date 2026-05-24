@@ -13,7 +13,8 @@ settings:
     INFOPLIST_FILE: Sources/App/Info.plist
     CODE_SIGN_STYLE: Manual
     CODE_SIGNING_REQUIRED: NO
-    CODE_SIGNING_ALLOWED: NO
+    CODE_SIGNING_ALLOWED: YES
+    CODE_SIGN_IDENTITY: "-"
 targets:
   PhotoSwiper:
     type: application

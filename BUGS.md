@@ -20,6 +20,16 @@
 
 ## Active bugs
 
+### BUG-004 — [P1] AltStore rejects IPA: "The data couldn't be read because it isn't in the correct format"
+
+- **Found in:** TASK-015 (Joe's first install attempt, 2026-05-24)
+- **Repro:** Tap Install on PhotoSwiper in AltStore → fails with "data couldn't be read" error.
+- **Diagnosis:** Downloaded IPA, unzipped. Contents: `PhotoSwiper` binary (75 KB), `Info.plist`, `PkgInfo`. **No `_CodeSignature/` directory, no `embedded.mobileprovision`.** Truly unsigned binaries don't have the Mach-O code-signature page that iOS (and AltStore's pre-install validator) require. Even ad-hoc signing produces the necessary structure for AltStore to strip and re-sign.
+- **Fix:** Switch from `CODE_SIGNING_ALLOWED=NO` to ad-hoc signing (`CODE_SIGN_IDENTITY="-"` + `CODE_SIGNING_ALLOWED=YES` + `CODE_SIGNING_REQUIRED=NO`). The `-` identity is built into macOS, requires no certs. Updated both `.github/workflows/build.yml` and `project.yml` for consistency.
+- **Status:** FIXED — commit pending. Verification: next CI run should produce an IPA with `_CodeSignature/CodeResources` present.
+
+---
+
 ### BUG-003 — [P1] CI Package step fails: `ls: build/PhotoSwiper.ipa: No such file or directory`
 
 - **Found in:** TASK-013 (second CI run, 2026-05-24)
