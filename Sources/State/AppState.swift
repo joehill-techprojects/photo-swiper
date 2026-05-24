@@ -116,6 +116,13 @@ public final class AppState {
 
     /// Create the iterator (if needed) and fill the initial buffer.
     ///
+    /// On first ever launch, triggers the iOS photo-library permission
+    /// prompt if status is `.notDetermined` — without this, the app would
+    /// silently render an empty deck because `PhotoFetcher` returns an
+    /// empty stream for unauthorised callers (and never prompts on its
+    /// own). The proper onboarding UI is TASK-062 in Phase 5; this is
+    /// the minimum viable hook.
+    ///
     /// Idempotent: calling more than once with an already-populated deck is
     /// a no-op (logs at `.debug`). Call from the root view's `.task`.
     public func loadInitial() async {
@@ -126,6 +133,16 @@ public final class AppState {
 
         isLoading = true
         defer { isLoading = false }
+
+        // First-launch permission prompt. `requestAuthorization` is a no-op
+        // if status is anything other than `.notDetermined`.
+        let currentStatus = PHPhotoLibrary.authorizationStatus(for: .readWrite)
+        if currentStatus == .notDetermined {
+            let granted = await PHPhotoLibrary.requestAuthorization(for: .readWrite)
+            Self.log.info(
+                "Photo authorization requested, result=\(granted.rawValue, privacy: .public)"
+            )
+        }
 
         Self.log.info(
             "loadInitial starting (order=\(self.settings.order.rawValue, privacy: .public))"

@@ -20,6 +20,17 @@
 
 ## Active bugs
 
+### BUG-010 — [P1] First launch never prompts for photo permission; deck stays empty
+
+- **Found in:** TASK-029 (Joe's manual test, 2026-05-24)
+- **Repro:** Fresh install → launch → "No more photos" empty state. No permission prompt ever appears. Photo library is full of photos.
+- **Cause:** Planning oversight. PhotoFetcher's authorization-handling branch returns an empty stream when status is not `.authorized | .limited` — including `.notDetermined`, the default for a first-launch app. It never CALLS `requestAuthorization`, only READS the current status. The plan punted the "ask for permission" flow to TASK-062 (Phase 5 PermissionView), but that made Phase 2 untestable end-to-end.
+- **Fix:** Added a minimum-viable `PHPhotoLibrary.requestAuthorization(for: .readWrite)` call to `AppState.loadInitial()` when the current status is `.notDetermined`. iOS shows its system prompt; if granted, the subsequent `fetcher.iterator()` call returns real photos; if denied, the existing empty-stream path still applies.
+- **Status:** FIXED — commit pending.
+- **Follow-up:** TASK-062 (Phase 5) will replace this minimum hook with a real onboarding `PermissionView` that gracefully handles `.denied` (deep-link to iOS Settings) and `.limited` (offer to re-open the library picker).
+
+---
+
 ### BUG-009 — [P1] AltStore refresh fails: "data couldn't be read because it's missing"
 
 - **Found in:** TASK-029 (Joe's first try at refreshing source for Phase 2 IPA, 2026-05-24)
