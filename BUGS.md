@@ -20,6 +20,16 @@
 
 ## Active bugs
 
+### BUG-008 — [P2] AppState.init default-param calls main-actor-isolated `Settings()` from nonisolated context
+
+- **Found in:** Integration CI run, 2026-05-24
+- **Error:** `call to main actor-isolated initializer 'init(defaults:)' in a synchronous nonisolated context`
+- **Cause:** `Settings` is `@MainActor`, so `Settings.init` is implicitly main-actor-isolated. `AppState.init(settings: Settings = Settings(), ...)` evaluates the default expression at the call site (NOT inside AppState's @MainActor context), where main-actor isolation isn't guaranteed.
+- **Fix:** Sentinel-nil pattern — `settings: Settings? = nil`, then `self.settings = settings ?? Settings()` inside the init body. The body IS @MainActor-isolated (because AppState is @MainActor), so the construction is allowed.
+- **Status:** FIXED — commit pending.
+
+---
+
 ### BUG-007 — [P2] PhotoFetcherTests compile error: `options??` double-optional chaining
 
 - **Found in:** Wave-B CI run, 2026-05-24

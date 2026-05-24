@@ -97,15 +97,18 @@ public final class AppState {
     /// Create the app state.
     ///
     /// - Parameters:
-    ///   - settings: The settings model. Defaults to a fresh
-    ///     `UserDefaults.standard`-backed instance.
+    ///   - settings: The settings model. Pass `nil` (default) to construct a
+    ///     fresh `UserDefaults.standard`-backed instance inside this `@MainActor`
+    ///     init — required because `Settings.init` is main-actor-isolated and
+    ///     can't be called from a default-parameter expression in a non-isolated
+    ///     context.
     ///   - fetcher: The `PhotoFetcher` used to produce the asset stream.
     ///     Injectable for tests; defaults to the production fetcher.
     public init(
-        settings: Settings = Settings(),
+        settings: Settings? = nil,
         fetcher: PhotoFetcher = PhotoFetcher()
     ) {
-        self.settings = settings
+        self.settings = settings ?? Settings()
         self.fetcher = fetcher
     }
 
