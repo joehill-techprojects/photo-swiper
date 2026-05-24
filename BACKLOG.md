@@ -40,15 +40,15 @@
 
 ## Phase 2 — Photo browsing core
 
-- [ ] **TASK-021** — Add `NSPhotoLibraryUsageDescription` and `NSPhotoLibraryAddUsageDescription` to Info.plist. *Depends TASK-016.*
-- [ ] **TASK-022** — Author `Sources/Photos/PhotoFetcher.swift` — wraps `PHAsset` fetch with random + chronological ordering modes. *Depends TASK-021.*
-- [ ] **TASK-023** — Author `Tests/PhotosTests/PhotoFetcherTests.swift` — unit tests for ordering against an injected asset list. *Depends TASK-022.*
-- [ ] **TASK-024** — Author `Sources/UI/SwipeCard.swift` — single-photo card with `DragGesture`, exposes `onSwipe(direction)`. *Depends TASK-016.*
-- [ ] **TASK-025** — Author `Sources/UI/CardStack.swift` — deck of 2-3 stacked `SwipeCard`s, pulls next from a stream. *Depends TASK-024.*
-- [ ] **TASK-026** — Author `Sources/State/Settings.swift` — `@Observable` model backed by `UserDefaults`. *No dependencies.*
-- [ ] **TASK-027** — Author `Sources/UI/SettingsView.swift` — toggle between random / oldest-first. *Depends TASK-026.*
-- [ ] **TASK-028** — Author `Sources/State/AppState.swift` — wires `Settings` + `PhotoFetcher` + `CardStack`. *Depends TASK-022..027.*
-- [ ] **TASK-029** — Manual test: launch on Joe's phone, photos appear, can swipe through. Log any bugs in `BUGS.md`. *Depends TASK-028.*
+- [x] **TASK-021** — Add `NSPhotoLibraryUsageDescription` and `NSPhotoLibraryAddUsageDescription` to Info.plist. *Done 2026-05-24.*
+- [x] **TASK-022** — Author `Sources/Photos/PhotoFetcher.swift` — wraps `PHAsset` fetch with random + chronological ordering modes. *Done 2026-05-24. Codex pass-1 fixes applied (Order unification with Settings.Order, OptionSet contains() for cloud-shared filter).*
+- [x] **TASK-023** — Author `Tests/PhotosTests/PhotoFetcherTests.swift` — unit tests for ordering against an injected asset list. *Done 2026-05-24. Covers authorization gating, PHFetchOptions contract, empty-input orchestration, deterministic seeded RNG. Two cloud-shared / shuffle-of-real-PHAssets tests deliberately XCTSkip'd (require real PHAsset construction, deferred to Phase 5). BUG-007 fix landed (try? → try XCTUnwrap).*
+- [x] **TASK-024** — Author `Sources/UI/SwipeCard.swift` — single-photo card with `DragGesture`, exposes `onSwipe(direction)`. *Done 2026-05-24. Codex pass-1 fixes applied (predictedEndTranslation for velocity, AsyncStream-based image loading to eliminate continuation double-resume race, synchronous imageRequestID assignment).*
+- [x] **TASK-025** — Author `Sources/UI/CardStack.swift` — deck of 2-3 stacked `SwipeCard`s, pulls next from a stream. *Done 2026-05-24. Renders top 3 with depth offset; ForEach keyed on localIdentifier.*
+- [x] **TASK-026** — Author `Sources/State/Settings.swift` — `@Observable` model backed by `UserDefaults`. *Done 2026-05-24. Codex pass-1 fix applied (immichURL load now requires http/https scheme + non-empty host).*
+- [x] **TASK-027** — Author `Sources/UI/SettingsView.swift` — toggle between random / oldest-first. *Done 2026-05-24. Form + segmented Picker + About section.*
+- [x] **TASK-028** — Author `Sources/State/AppState.swift` — wires `Settings` + `PhotoFetcher` + `CardStack`. *Done 2026-05-24. Also rewrote ContentView.swift to host the new integrated UI. BUG-008 fix landed (nil-sentinel for Settings default param).*
+- [~] **TASK-029** — Manual test: launch on Joe's phone, photos appear, can swipe through. Log any bugs in `BUGS.md`. *Awaiting Joe's test 2026-05-24.*
 
 ## Phase 3 — Actions wired
 

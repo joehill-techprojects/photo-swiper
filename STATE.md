@@ -5,37 +5,31 @@
 
 ## Current phase
 
-**Phase 1 complete → Phase 2 ready to start.** Hello World launches on Joe's phone via the full pipeline. From here, every commit ships an IPA automatically; Joe just refreshes in AltStore when he wants the latest.
+**Phase 2 complete → awaiting Joe's manual test on phone.** All code shipped through CI (final build `ac9160c`, IPA in latest GitHub Release).
 
 ## Last completed task
 
-`TASK-016` — Joe confirmed PhotoSwiper installs and launches on his iPhone 2026-05-24.
+`TASK-028` — AppState integration + ContentView rewrite. CI green after fixes for BUG-007 (test syntax) and BUG-008 (main-actor isolation default param).
 
 ## Next task
 
-**Phase 2 — Photo browsing core.** Real app work begins. Tasks fan out into mostly-independent components:
+`TASK-029` — Joe opens AltStore, refreshes "Joe's Personal Apps" source, installs/updates PhotoSwiper, launches, runs through:
+- iOS shows photo permission prompt → Allow Access to All Photos
+- Photos appear in a swipeable deck (no actions wired yet — Phase 3)
+- Drag left/right/up and see the colored hint overlays; release past threshold flies the card off, deck shifts up
+- Tap the gear icon (top right) → Settings sheet, toggle between Random and Oldest first, dismiss → deck reloads in new order
 
-- `TASK-021` — small Info.plist edit to add photo permission descriptions (prerequisite for everything else)
-- `TASK-022` — `PhotoFetcher` service (PhotoKit wrapper, random + chronological ordering)
-- `TASK-024` — `SwipeCard` view (single card + DragGesture)
-- `TASK-026` — `Settings` model (`@Observable`, UserDefaults-backed)
-- `TASK-023` — `PhotoFetcher` unit tests
-- `TASK-025` — `CardStack` view (deck of 2-3 SwipeCards)
-- `TASK-027` — `SettingsView` (order toggle)
-- `TASK-028` — `AppState` (wires Settings + PhotoFetcher + CardStack)
-- `TASK-029` — Joe installs and manually tests on phone
-
-Fan-out is genuinely valuable here: 022/024/026 are independent; 023/025/027 each depend on one of those. Recommend subagent-per-component dispatch.
+After Joe reports back with anything broken, fix → Phase 3 (wire delete/share/undo to those swipes).
 
 ## Active blockers
 
-None.
+`TASK-029` — Joe-only manual test.
 
 ## High-level progress
 
 - [x] Phase 0 — Foundations
 - [x] Phase 1 — Build pipeline
-- [ ] Phase 2 — Photo browsing core
+- [~] Phase 2 — Photo browsing core (code done, awaiting Joe's manual test)
 - [ ] Phase 3 — Actions wired
 - [ ] Phase 4 — Immich integration
 - [ ] Phase 5 — Polish & rollout
