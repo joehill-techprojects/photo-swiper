@@ -13,12 +13,19 @@
       "tintColor": "7C3AED",
       "category": "photo-video",
       "screenshotURLs": [],
-      "version": "0.1.2",
-      "versionDate": "2026-05-24T13:35:00-05:00",
-      "versionDescription": "Phase 3: swipe actions wired. Left = delete (iOS shows its own confirmation). Up = share via Messages. Down = skip. Right = placeholder for now (real Immich upload in Phase 4). Undo button in the top-left toolbar reverses the last swipe.",
-      "downloadURL": "https://github.com/joehill-techprojects/photo-swiper/releases/download/v0.1.20260524183917/PhotoSwiper.ipa",
-      "size": 138945,
+      "version": "0.1.3",
+      "versionDate": "2026-05-24T14:02:00-05:00",
+      "versionDescription": "Phase 3.1: trash-bucket delete model. Left swipe now queues photos for delete instead of deleting one at a time. New trash badge in the toolbar shows the pending count — tap it to delete the whole batch with ONE iOS confirmation. Undo actually keeps photos in your library now. Pending bucket survives app quit.",
+      "downloadURL": "https://github.com/joehill-techprojects/photo-swiper/releases/download/v0.1.20260524190213/PhotoSwiper.ipa",
+      "size": 156624,
       "versions": [
+        {
+          "version": "0.1.3",
+          "date": "2026-05-24T14:02:00-05:00",
+          "size": 156624,
+          "downloadURL": "https://github.com/joehill-techprojects/photo-swiper/releases/download/v0.1.20260524190213/PhotoSwiper.ipa",
+          "localizedDescription": "Phase 3.1: trash-bucket delete model. Left swipe queues photos for batch delete (no more tap-to-confirm per photo). Toolbar trash badge shows the pending count; tap it to commit (one iOS confirmation for the whole batch) or discard. Undo really works now — photos never leave your library until you confirm the batch. Pending bucket persists across app quits."
+        },
         {
           "version": "0.1.2",
           "date": "2026-05-24T13:35:00-05:00",

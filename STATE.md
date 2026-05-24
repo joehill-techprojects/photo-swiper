@@ -18,27 +18,31 @@ Then ask Joe what chunk to start. **Default next chunk is Phase 3** (plan in "Ne
 
 ## Current phase
 
-**Phase 3 code complete → awaiting CI green, then Joe's manual test (TASK-037 / H-030).** All five Phase 3 implementation tasks landed in one session via Wave A (DeleteAction / ShareAction / UndoStack — 3 parallel subagents), Wave B (UndoStackTests), and an integration subagent (AppState wiring + ContentView undo button). SwipeCard `.down` direction landed inline.
+**Phase 3.1 shipped → awaiting Joe's re-test (TASK-106 / H-031).** Joe's first Phase 3 test (TASK-037 / H-030) surfaced D-024: the iOS per-delete confirmation is unacceptable at 50K-photo scale, and undo wasn't real (photo was already gone). Phase 3.1 reworked the delete model: left swipe parks in a `PendingDeleteStore`, a new trash toolbar badge shows the count, tapping it commits the whole batch via one iOS confirmation. Undo now actually keeps photos in the library.
 
 ## Last completed task
 
-`TASK-030..036`, `TASK-038`, `TASK-039` — all Phase 3 code merged in one commit. Only TASK-037 (Joe's manual test on phone) remains.
+`TASK-100..105` — all Phase 3.1 trash-bucket code shipped in commit `e988d19`; altstore-source.json bumped to 0.1.3 pinned at `v0.1.20260524190213`.
 
 ## Next task
 
-**Once CI passes:**
+**TASK-106 — Joe re-tests on phone (H-031).** Refresh AltStore source, tap Update. Verify:
 
-1. Update `altstore-source.json` (see "When shipping Phase 3 IPA" below).
-2. Tell Joe (H-030) to refresh source + tap Update.
-3. Joe runs through delete / share / undo / skip / right-placeholder on phone.
+- Left swipe is silent (no iOS prompt per swipe).
+- Trash badge in top-right shows pending count and increments per left swipe.
+- Undo: tap it after a left swipe → card returns AND the photo is still in the library (open Photos.app to verify).
+- Batch commit: tap trash badge → confirmation dialog appears → tap "Delete N photos" → iOS shows ONE prompt → confirm → all gone (in Recently Deleted).
+- Discard: tap trash badge → tap "Discard pending" → badge clears, photos stay in library.
+- Persistence: queue some photos, force-quit app, relaunch — badge should show the same count.
+- Other directions (right placeholder / up share / down skip) still work as before.
 
-If Joe finds bugs, log them in BUGS.md as BUG-NNN and mirror as TASK-1NN in BACKLOG.md.
+If bugs found, log as BUG-NNN in BUGS.md and mirror as TASK-1NN in BACKLOG.md.
 
-**After Phase 3 acceptance → Phase 4 (Immich integration).** First step is H-021 (Joe pastes Immich URL + API key).
+**After acceptance → Phase 4 (Immich integration).** First step is H-021 (Joe pastes Immich URL + API key).
 
 ## Active blockers
 
-- H-030 — Joe to test Phase 3 IPA on phone (refresh source in AltStore, tap Update, run through delete / share / undo / skip / right-placeholder).
+- H-031 — Joe to test Phase 3.1 IPA on phone (trash-bucket flow).
 
 ## High-level progress
 
@@ -53,10 +57,10 @@ If Joe finds bugs, log them in BUGS.md as BUG-NNN and mirror as TASK-1NN in BACK
 
 ### State of the world
 
-- **Joe's iPhone has v0.1.1 installed.** v0.1.2 ships Phase 3: left=delete (iOS confirms), right=placeholder log (Phase 4 swaps to Immich), up=share sheet, down=skip, undo button in top-left.
+- **Joe's iPhone has v0.1.1 installed.** v0.1.3 (current pinned IPA) ships Phase 3.1: trash-bucket delete model per D-024 — left=queue for batch delete (no iOS prompt per swipe), right=placeholder log (Phase 4 swaps to Immich), up=share sheet, down=skip, undo button in top-left, trash badge in top-right shows pending count and commits the whole batch via one iOS prompt.
 - **Build pipeline is rock solid.** ~3-5 min per CI run on macos-15. Manifest/markdown changes are in `paths-ignore` so they DON'T trigger builds.
 - **AltStore source URL** (give Joe if he ever needs it again): `https://raw.githubusercontent.com/joehill-techprojects/photo-swiper/main/altstore-source.json`
-- **AltStore source uses pinned direct URLs** (not `/releases/latest/`) so the URL stays stable across our manifest updates. The pinned tag is `v0.1.20260524183917` (Phase 3, 138945 bytes). Bump this when releasing Phase 4.
+- **AltStore source uses pinned direct URLs** (not `/releases/latest/`) so the URL stays stable across our manifest updates. The pinned tag is `v0.1.20260524190213` (Phase 3.1, 156624 bytes). Bump this when releasing Phase 4.
 
 ### When shipping the next phase's IPA
 
