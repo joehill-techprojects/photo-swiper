@@ -18,22 +18,22 @@
 
 ## Phase 0 — Foundations
 
-- [~] **TASK-001** — Initialize local git repo and `.gitignore` (Xcode + macOS + Swift). *No dependencies.* *(in progress this commit)*
-- [ ] **TASK-002** — Push initial scaffold to GitHub. *Unblocked: repo exists, PAT in Windows Credential Manager. First push fires GUI dialog for Joe.*
-- [ ] **TASK-003** — Flesh out `docs/setup-guide.md` with AltServer + AltStore install steps. *No dependencies; pure docs. Capture iTunes-path nag (BUG-001) and Developer Mode (H-012) gotchas while fresh.*
+- [x] **TASK-001** — Initialize local git repo and `.gitignore` (Xcode + macOS + Swift). *Done 2026-05-24, commit `e664014`.*
+- [x] **TASK-002** — Push initial scaffold to GitHub. *Done 2026-05-24, pushed `e664014` → `origin/main`. (Credential manager had GitHub creds cached, no dialog needed.)*
+- [x] **TASK-003** — Flesh out `docs/setup-guide.md` with AltServer + AltStore install steps. *Done 2026-05-24. Includes iTunes nag (BUG-001), Developer Mode (H-012), Immich API key flow, maintenance procedures.*
 - [x] **TASK-004** — Confirm Joe has installed AltServer + iTunes on JARVIS. *Done 2026-05-24.*
 - [x] **TASK-005** — Confirm Joe has AltStore on his phone. *Done 2026-05-24 (after Developer Mode toggle; see H-012).*
 
 ## Phase 1 — Build pipeline (Hello World end-to-end)
 
-- [ ] **TASK-006** — Write `project.yml` (XcodeGen spec) for a Hello-World SwiftUI app targeting iOS 17. *No dependencies.*
-- [ ] **TASK-007** — Write `Sources/App/Info.plist` with bundle ID `com.joehill.photoswiper`. *Depends TASK-006.*
-- [ ] **TASK-008** — Write `Sources/App/PhotoSwiperApp.swift` — `@main` entry. *Depends TASK-006.*
-- [ ] **TASK-009** — Write `Sources/App/ContentView.swift` — placeholder "PhotoSwiper" text. *Depends TASK-008.*
-- [ ] **TASK-010** — Write `.github/workflows/build.yml` — installs XcodeGen, generates project, runs `xcodebuild archive`, produces unsigned `.ipa`, uploads as workflow artifact. *Depends TASK-006..009.*
-- [ ] **TASK-011** — Write `.github/workflows/release.yml` — on push to `main` after build success, creates a tagged GitHub Release with the IPA attached. *Depends TASK-010.*
-- [ ] **TASK-012** — Write `altstore-source.json` — AltStore source manifest pointing at GitHub Releases. *Depends TASK-011.*
-- [ ] **TASK-013** — First push, watch CI go green. Iterate on TASK-010/011 until success. *Depends TASK-002, TASK-010, TASK-011.*
+- [x] **TASK-006** — Write `project.yml` (XcodeGen spec) for a Hello-World SwiftUI app targeting iOS 17. *Done 2026-05-24. Test target deferred to TASK-023 (YAGNI).*
+- [x] **TASK-007** — Write `Sources/App/Info.plist` with bundle ID `com.joehill.photoswiper`. *Done 2026-05-24.*
+- [x] **TASK-008** — Write `Sources/App/PhotoSwiperApp.swift` — `@main` entry. *Done 2026-05-24.*
+- [x] **TASK-009** — Write `Sources/App/ContentView.swift` — placeholder "PhotoSwiper" text. *Done 2026-05-24.*
+- [x] **TASK-010** — Write `.github/workflows/build.yml` — installs XcodeGen, generates project, runs `xcodebuild archive`, produces unsigned `.ipa`, uploads as workflow artifact, AND creates GitHub Release on push to main (folded TASK-011 into here per plan note). *Done 2026-05-24.*
+- [x] **TASK-011** — ~~Separate release.yml~~ folded into `build.yml` per plan, no separate file. *Done 2026-05-24.*
+- [x] **TASK-012** — Write `altstore-source.json` — AltStore source manifest pointing at GitHub Releases. *Done 2026-05-24. URLs use joehill-techprojects/photo-swiper. iconURL points at future asset path (will 404 until TASK-060 lands the real icon — AltStore tolerates this).*
+- [~] **TASK-013** — First push, watch CI go green. Iterate on TASK-010 until success. *In progress: pushing now.*
 - [ ] **TASK-014** — Verify IPA downloads correctly from the latest GitHub Release URL. *Depends TASK-013.*
 - [ ] **TASK-015** — Tell Joe (via HUMAN-TODO H-020): add `altstore-source.json` URL to AltStore on phone, install PhotoSwiper, launch it. *Depends TASK-005, TASK-014.*
 - [ ] **TASK-016** — Confirm Hello-World launches on Joe's phone (Joe reports back). *Depends TASK-015.*

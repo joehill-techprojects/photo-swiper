@@ -1,0 +1,31 @@
+{
+  "name": "Joe's Personal Apps",
+  "identifier": "com.joehill.altstore-source",
+  "apps": [
+    {
+      "name": "PhotoSwiper",
+      "bundleIdentifier": "com.joehill.photoswiper",
+      "developerName": "Joe Hill",
+      "subtitle": "Swipe your camera roll",
+      "localizedDescription": "Tinder-style photo curation. Swipe left = delete, right = save to Immich, up = share to the other person via Messages.",
+      "iconURL": "https://raw.githubusercontent.com/joehill-techprojects/photo-swiper/main/Sources/Resources/Assets.xcassets/AppIcon.appiconset/icon-1024.png",
+      "tintColor": "#7C3AED",
+      "category": "photo-video",
+      "screenshotURLs": [],
+      "versions": [
+        {
+          "version": "0.1.0",
+          "date": "2026-05-24T00:00:00-05:00",
+          "downloadURL": "https://github.com/joehill-techprojects/photo-swiper/releases/latest/download/PhotoSwiper.ipa",
+          "size": 0
+        }
+      ],
+      "permissions": [
+        {
+          "type": "photos",
+          "usageDescription": "Show and curate your photo library."
+        }
+      ]
+    }
+  ]
+}

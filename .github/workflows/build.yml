@@ -1,0 +1,65 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write   # needed to create releases on push to main
+
+jobs:
+  build:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Show Xcode version
+        run: xcodebuild -version
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate xcodeproj
+        run: xcodegen generate
+
+      - name: Archive for device (unsigned)
+        run: |
+          xcodebuild archive \
+            -project PhotoSwiper.xcodeproj \
+            -scheme PhotoSwiper \
+            -archivePath build/PhotoSwiper.xcarchive \
+            -destination 'generic/platform=iOS' \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY=""
+
+      - name: Package unsigned IPA
+        run: |
+          mkdir -p build/Payload
+          cp -R build/PhotoSwiper.xcarchive/Products/Applications/PhotoSwiper.app build/Payload/
+          cd build && zip -qr PhotoSwiper.ipa Payload
+          ls -lh build/PhotoSwiper.ipa
+
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: PhotoSwiper-ipa
+          path: build/PhotoSwiper.ipa
+          retention-days: 30
+
+      - name: Compute release tag
+        id: tag
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          TAG="v0.1.$(date +%Y%m%d%H%M%S)"
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag.outputs.tag }}
+          files: build/PhotoSwiper.ipa
+          generate_release_notes: true
