@@ -20,6 +20,25 @@
 
 ## Active bugs
 
+### BUG-009 — [P1] AltStore refresh fails: "data couldn't be read because it's missing"
+
+- **Found in:** TASK-029 (Joe's first try at refreshing source for Phase 2 IPA, 2026-05-24)
+- **Error:** `NSValueNotFoundError` (Cocoa code 4865) on JSON decode of the source manifest — a required field is missing.
+- **Cause:** The v2 PAL schema I followed in the BUG-006 rewrite dropped fields that AltStore *Classic* still requires. The fact that install worked means Classic's install code path tolerates the missing fields, but the refresh code path (which re-validates the whole structure) does not.
+- **Compared against Provenance's known-working classic source (`https://provenance-emu.com/apps.json`)** and found:
+  - `sourceURL` missing at root (self-referential URL)
+  - `size` missing on version objects (byte count of the IPA — actual value 105349)
+  - `screenshots` renamed back to `screenshotURLs` (Classic uses legacy name)
+  - `appPermissions` should be a `{entitlements: [], privacy: {key: description}}` object, not an empty dict
+  - Top-level app fields `version`, `versionDate`, `versionDescription`, `downloadURL`, `size` mirror the latest version entry (Classic caches them)
+  - `tintColor` should be hex without leading `#`
+  - `buildVersion` removed (Classic doesn't use it)
+- **Fix:** Full rewrite of `altstore-source.json` to match Provenance's structure (which has been working in AltStore Classic for years).
+- **Status:** FIXED — commit pending.
+- **Lesson:** The AltStore PAL docs at faq.altstore.io describe the *newer* PAL-targeting source schema. Classic uses a slightly different/older schema; reference a known-working Classic source (like Provenance) when targeting Classic.
+
+---
+
 ### BUG-008 — [P2] AppState.init default-param calls main-actor-isolated `Settings()` from nonisolated context
 
 - **Found in:** Integration CI run, 2026-05-24
