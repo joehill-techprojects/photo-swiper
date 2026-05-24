@@ -41,9 +41,10 @@
 ## During development (Joe-blocking moments to expect)
 
 - [x] **H-013** — Repo flipped to PUBLIC. *Done 2026-05-24.*
-- [ ] **H-020** — Test the first Hello World IPA. Agent will tell Joe: "open AltStore, tap the source, install PhotoSwiper, then launch it. Tell me what you see." *Triggered by: TASK-015.*
-- [ ] **H-021** — Confirm Immich URL + generate an API key on the Immich web UI. Paste both into the agent's chat. *Triggered by: TASK-040*
-- [ ] **H-022** — Manual testing of the full swipe loop on Joe's phone before Jill onboards. *Triggered by: TASK-065*
+- [x] **H-020** — Tested Hello World IPA + Phase 2 IPA on Joe's phone. *Done 2026-05-24. Phase 2 acceptance passed.*
+- [ ] **H-021** — Confirm Immich URL + generate an API key on the Immich web UI. Paste both into the agent's chat. *Triggered by: TASK-040 (Phase 4)*
+- [ ] **H-022** — Manual testing of the full swipe loop on Joe's phone before Jill onboards. *Triggered by: TASK-065 (Phase 5)*
+- [ ] **H-030** — Test Phase 3 IPA on Joe's phone (delete / share / undo / skip). iOS will show a system confirmation when left-swipe deletes — verify that flow feels right before we trust it. *Triggered by: TASK-037 (Phase 3)*
 
 ---
 
