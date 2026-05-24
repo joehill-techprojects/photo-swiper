@@ -52,16 +52,16 @@
 
 ## Phase 3 — Actions wired
 
-- [ ] **TASK-030** — Author `Sources/Actions/DeleteAction.swift` — wraps `PHAssetChangeRequest.deleteAssets`. *Depends TASK-029.*
-- [ ] **TASK-031** — Author `Sources/Actions/ShareAction.swift` — presents `UIActivityViewController` with the asset image and pre-selected Messages target. *Depends TASK-029.*
-- [ ] **TASK-032** — Author `Sources/State/UndoStack.swift` — bounded LIFO of swipe events, each with a reverse action closure. *No dependencies (besides TASK-029).*
-- [ ] **TASK-033** — Author `Tests/StateTests/UndoStackTests.swift` — unit tests for push/pop/clear, max-size eviction. *Depends TASK-032.*
-- [ ] **TASK-034** — Wire left-swipe in `CardStack` → `DeleteAction` + push to `UndoStack`. *Depends TASK-030, TASK-032.*
-- [ ] **TASK-035** — Wire up-swipe → `ShareAction` + push to `UndoStack`. *Depends TASK-031, TASK-032.*
-- [ ] **TASK-036** — Add undo button to the UI, wire to `UndoStack.pop`. *Depends TASK-032.*
-- [ ] **TASK-037** — Manual test: each gesture works on Joe's phone, undo works. *Depends TASK-034..036, TASK-038, TASK-039.*
-- [ ] **TASK-038** — Add `.down` to `SwipeCard.Direction` enum, update `directionForCommit` to detect downward swipes past threshold, add a gray "snooze" hint overlay. Wire AppState to handle `.down` as a no-op skip (just remove from deck, log skipped). Per D-022. *Depends TASK-024.*
-- [ ] **TASK-039** — Wire `.right` swipe in `AppState.handleSwipe` to a placeholder log (no real action yet — Phase 4 swaps in `ImmichClient.upload`). Card removes from deck as usual. Avoids "right does nothing visible" feeling weird in Phase 3 testing. *Depends TASK-028.*
+- [x] **TASK-030** — Author `Sources/Actions/DeleteAction.swift` — wraps `PHAssetChangeRequest.deleteAssets`. *Done 2026-05-24. Wave A subagent. Maps `PHPhotosError.userCancelled` to `DeleteError.userCancelled` so caller skips UndoStack push.*
+- [x] **TASK-031** — Author `Sources/Actions/ShareAction.swift` — presents `UIActivityViewController` with the asset image and pre-selected Messages target. *Done 2026-05-24. Wave A subagent. Uses `PHImageManagerMaximumSize` for full-res share; walks `connectedScenes` → `keyWindow` → `presentedViewController` for the topmost presenter.*
+- [x] **TASK-032** — Author `Sources/State/UndoStack.swift` — bounded LIFO of swipe events, each with a reverse action closure. *Done 2026-05-24. Wave A subagent. `@MainActor @Observable`; `isEmpty`/`count` are computed off the observed entries array.*
+- [x] **TASK-033** — Author `Tests/StateTests/UndoStackTests.swift` — unit tests for push/pop/clear, max-size eviction. *Done 2026-05-24. Wave B subagent. 7 test cases including bounded eviction with maxSize:2 verifying A,B evicted and only D,C run in LIFO order.*
+- [x] **TASK-034** — Wire left-swipe in `CardStack` → `DeleteAction` + push to `UndoStack`. *Done 2026-05-24. Integration subagent. `userCancelled` restores card without undo entry; other errors restore + log.*
+- [x] **TASK-035** — Wire up-swipe → `ShareAction` + push to `UndoStack`. *Done 2026-05-24. Integration subagent. Undo pushed once share sheet appears regardless of whether user actually sends (per ShareAction's contract).*
+- [x] **TASK-036** — Add undo button to the UI, wire to `UndoStack.pop`. *Done 2026-05-24. Integration subagent. Leading toolbar item (`arrow.uturn.backward.circle`), disabled when undoStack.isEmpty.*
+- [ ] **TASK-037** — Manual test: each gesture works on Joe's phone, undo works. *Depends TASK-034..036, TASK-038, TASK-039. Tracked as H-030.*
+- [x] **TASK-038** — Add `.down` to `SwipeCard.Direction` enum, update `directionForCommit` to detect downward swipes past threshold, add a gray "snooze" hint overlay. Wire AppState to handle `.down` as a no-op skip (just remove from deck, log skipped). Per D-022. *Done 2026-05-24. Part 1 (SwipeCard) inline; part 2 (AppState) via integration subagent.*
+- [x] **TASK-039** — Wire `.right` swipe in `AppState.handleSwipe` to a placeholder log (no real action yet — Phase 4 swaps in `ImmichClient.upload`). Card removes from deck as usual. Avoids "right does nothing visible" feeling weird in Phase 3 testing. *Done 2026-05-24. Integration subagent. Per D-023.*
 
 ## Phase 4 — Immich integration
 

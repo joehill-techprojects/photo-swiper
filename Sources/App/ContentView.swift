@@ -43,6 +43,15 @@ struct ContentView: View {
                 .navigationTitle("PhotoSwiper")
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
+                    ToolbarItem(placement: .topBarLeading) {
+                        Button {
+                            Task { await appState.undo() }
+                        } label: {
+                            Image(systemName: "arrow.uturn.backward.circle")
+                        }
+                        .disabled(appState.undoStack.isEmpty)
+                        .accessibilityLabel("Undo last swipe")
+                    }
                     ToolbarItem(placement: .topBarTrailing) {
                         Button {
                             showingSettings = true

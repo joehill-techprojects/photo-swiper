@@ -18,39 +18,34 @@ Then ask Joe what chunk to start. **Default next chunk is Phase 3** (plan in "Ne
 
 ## Current phase
 
-**Phase 2 complete (TASK-029 done) → Phase 3 ready to start.** Joe's manual test passed: deck loads, swipes register, hints render, settings reload, photo permission prompt fires per BUG-010 fix.
+**Phase 3 code complete → awaiting CI green, then Joe's manual test (TASK-037 / H-030).** All five Phase 3 implementation tasks landed in one session via Wave A (DeleteAction / ShareAction / UndoStack — 3 parallel subagents), Wave B (UndoStackTests), and an integration subagent (AppState wiring + ContentView undo button). SwipeCard `.down` direction landed inline.
 
 ## Last completed task
 
-`TASK-029` — Joe ran through the full Phase 2 flow on his iPhone and confirmed acceptance. New feedback: down swipe should be "skip" (D-022, TASK-038).
+`TASK-030..036`, `TASK-038`, `TASK-039` — all Phase 3 code merged in one commit. Only TASK-037 (Joe's manual test on phone) remains.
 
 ## Next task
 
-**Phase 3 — Actions wired.** Subagent fan-out plan:
+**Once CI passes:**
 
-1. **Inline prep:** TASK-038 (extend Direction enum with `.down`, update SwipeCard hint overlay + gesture detection)
-2. **Wave A (parallel, independent files):**
-   - TASK-030 — `Sources/Actions/DeleteAction.swift` (PHAssetChangeRequest deletion with iOS confirmation)
-   - TASK-031 — `Sources/Actions/ShareAction.swift` (UIActivityViewController, Messages preselected)
-   - TASK-032 — `Sources/State/UndoStack.swift` (bounded LIFO with reverse-action closures)
-3. **Wave B (parallel):**
-   - TASK-033 — `Tests/StateTests/UndoStackTests.swift`
-4. **Inline integration:** TASK-034 + TASK-035 + TASK-036 + TASK-038 part 2 + TASK-039 — all touch AppState/ContentView, single subagent
-5. **Push, CI, fix**
-6. **TASK-037** — Joe tests on phone
+1. Update `altstore-source.json` (see "When shipping Phase 3 IPA" below).
+2. Tell Joe (H-030) to refresh source + tap Update.
+3. Joe runs through delete / share / undo / skip / right-placeholder on phone.
 
-After Phase 3: left swipe deletes (iOS confirms), up swipe shares (Messages), down swipe skips, right swipe placeholder (real upload in Phase 4), undo button works.
+If Joe finds bugs, log them in BUGS.md as BUG-NNN and mirror as TASK-1NN in BACKLOG.md.
+
+**After Phase 3 acceptance → Phase 4 (Immich integration).** First step is H-021 (Joe pastes Immich URL + API key).
 
 ## Active blockers
 
-None.
+- CI must complete before manifest update (need new release tag + IPA size). Watching `gh run watch` after push.
 
 ## High-level progress
 
 - [x] Phase 0 — Foundations
 - [x] Phase 1 — Build pipeline
 - [x] Phase 2 — Photo browsing core
-- [ ] Phase 3 — Actions wired (next)
+- [~] Phase 3 — Actions wired (code done, awaiting Joe's test)
 - [ ] Phase 4 — Immich integration
 - [ ] Phase 5 — Polish & rollout
 
@@ -58,7 +53,7 @@ None.
 
 ### State of the world
 
-- **Joe's iPhone has v0.1.1 installed.** Phase 2 UI (deck, swipes, settings, hints) all working. No actions wired yet.
+- **Joe's iPhone has v0.1.1 installed.** v0.1.2 ships Phase 3: left=delete (iOS confirms), right=placeholder log (Phase 4 swaps to Immich), up=share sheet, down=skip, undo button in top-left.
 - **Build pipeline is rock solid.** ~3-5 min per CI run on macos-15. Manifest/markdown changes are in `paths-ignore` so they DON'T trigger builds.
 - **AltStore source URL** (give Joe if he ever needs it again): `https://raw.githubusercontent.com/joehill-techprojects/photo-swiper/main/altstore-source.json`
 - **AltStore source uses pinned direct URLs** (not `/releases/latest/`) so the URL stays stable across our manifest updates. The pinned tag is `v0.1.20260524180218`. Bump this when releasing Phase 3.

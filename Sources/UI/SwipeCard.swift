@@ -23,10 +23,10 @@ import SwiftUI
 import UIKit
 import os
 
-/// The three swipe outcomes the card can produce.
+/// The four swipe outcomes the card can produce.
 ///
 /// Used by `SwipeCard`, `CardStack`, and `AppState` to dispatch the
-/// matching action (delete / upload / share).
+/// matching action (delete / upload / share / skip).
 public enum Direction {
     /// Swipe left — delete from the photo library.
     case left
@@ -34,6 +34,8 @@ public enum Direction {
     case right
     /// Swipe up — share to the other household member via Messages.
     case up
+    /// Swipe down — skip ("I'll get to it later"). No side effect. Per D-022.
+    case down
 }
 
 /// A draggable photo card. Renders a `PHAsset` and reports the user's
@@ -149,6 +151,12 @@ public struct SwipeCard: View {
                 opacity: upHintOpacity,
                 alignment: .top
             )
+            hintLayer(
+                color: .gray,
+                systemImage: "clock.fill",
+                opacity: downHintOpacity,
+                alignment: .bottom
+            )
         }
         .allowsHitTesting(false)
     }
@@ -228,13 +236,22 @@ public struct SwipeCard: View {
     }
 
     private var upHintOpacity: Double {
-        // Only show the up hint if the drag is dominantly vertical; otherwise
-        // a diagonal left-down drag would also light up the share icon.
+        // Only show the up hint if the drag is dominantly vertical and going up;
+        // otherwise a diagonal left-down drag would also light up the share icon.
         guard currentOffset.height < 0,
               abs(currentOffset.height) > abs(currentOffset.width) else {
             return 0
         }
         return opacityFor(distance: -currentOffset.height)
+    }
+
+    private var downHintOpacity: Double {
+        // Mirror of upHintOpacity: only when drag is dominantly vertical and going down.
+        guard currentOffset.height > 0,
+              abs(currentOffset.height) > abs(currentOffset.width) else {
+            return 0
+        }
+        return opacityFor(distance: currentOffset.height)
     }
 
     private func opacityFor(distance: CGFloat) -> Double {
@@ -255,8 +272,7 @@ public struct SwipeCard: View {
             return translation.width < 0 ? .left : .right
         } else {
             guard vertical >= Self.commitThreshold else { return nil }
-            // Only "up" is a swipe — a downward fling is treated as cancel.
-            return translation.height < 0 ? .up : nil
+            return translation.height < 0 ? .up : .down
         }
     }
 
@@ -270,6 +286,8 @@ public struct SwipeCard: View {
             target = CGSize(width: Self.flyAwayDistance, height: 0)
         case .up:
             target = CGSize(width: 0, height: -Self.flyAwayDistance)
+        case .down:
+            target = CGSize(width: 0, height: Self.flyAwayDistance)
         }
 
         withAnimation(.interactiveSpring(response: 0.35, dampingFraction: 0.85)) {
