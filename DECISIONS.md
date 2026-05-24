@@ -60,9 +60,15 @@ User pastes API key once in Settings. Keychain so it survives reinstall and isn'
 
 Order mode (random/oldest), share-target contact, last-shown asset id for resume-on-launch. Survives reinstall via iCloud backup.
 
-### D-014 — Repo: GitHub, private, name TBD
+### ~~D-014 — Repo: GitHub, private, name TBD~~ **SUPERSEDED 2026-05-24 by D-021.**
 
 Joe picks the name when he creates it. Private so the IPA / source isn't world-readable (AltStore-source-as-JSON is the only public surface, served via raw.githubusercontent.com which works for private repos via PAT-signed URLs — alternative is to make it public).
+
+### D-021 — Repo: GitHub, **public**, `joehill-techprojects/photo-swiper`
+
+**Supersedes D-014.** AltStore cannot authenticate to GitHub when pulling the source JSON or IPA — it makes anonymous requests. A private repo returns 404. We considered a public-proxy-repo workaround but rejected it as extra maintenance for a hobby project. Joe flipped the repo to public 2026-05-24.
+
+Security implications considered: no secrets in the repo (PAT lives in Windows Credential Manager only, Immich API key only on devices), the Immich server URL `192.168.1.20:2283` is a private LAN IP useless from outside Joe's house, code is hobby-level and Joe is fine with it being world-readable.
 
 ### D-015 — Testing strategy: unit-test pure logic, manual-test UI
 

@@ -35,7 +35,7 @@
 - [x] **TASK-012** — Write `altstore-source.json` — AltStore source manifest pointing at GitHub Releases. *Done 2026-05-24. URLs use joehill-techprojects/photo-swiper. iconURL points at future asset path (will 404 until TASK-060 lands the real icon — AltStore tolerates this).*
 - [x] **TASK-013** — First push, watch CI go green. *Done 2026-05-24, commit `890237b`. Two CI failures before success: BUG-002 (macos-14 Xcode 15.4 too old for XcodeGen objectVersion 77 → bumped to macos-15), BUG-003 (cd persistence in heredoc broke ls path → subshell fix).*
 - [x] **TASK-014** — Verify IPA downloads correctly from the latest GitHub Release URL. *Done 2026-05-24. Release `v0.1.20260524153920` has `PhotoSwiper.ipa` attached, 8599 bytes (expected for Hello World).*
-- [!] **TASK-015** — Tell Joe (via HUMAN-TODO H-020): add `altstore-source.json` URL to AltStore on phone, install PhotoSwiper, launch it. *Blocked on H-013: repo is private, AltStore can't auth to GitHub. Joe must either flip repo to public or accept hosting workaround.*
+- [~] **TASK-015** — Tell Joe (via HUMAN-TODO H-020): add `altstore-source.json` URL to AltStore on phone, install PhotoSwiper, launch it. *Unblocked 2026-05-24 (repo public). Waiting on Joe's install attempt.*
 - [ ] **TASK-016** — Confirm Hello-World launches on Joe's phone (Joe reports back). *Depends TASK-015.*
 
 ## Phase 2 — Photo browsing core
