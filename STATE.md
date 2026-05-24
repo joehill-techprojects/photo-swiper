@@ -38,7 +38,7 @@ If Joe finds bugs, log them in BUGS.md as BUG-NNN and mirror as TASK-1NN in BACK
 
 ## Active blockers
 
-- CI must complete before manifest update (need new release tag + IPA size). Watching `gh run watch` after push.
+- H-030 — Joe to test Phase 3 IPA on phone (refresh source in AltStore, tap Update, run through delete / share / undo / skip / right-placeholder).
 
 ## High-level progress
 
@@ -56,14 +56,14 @@ If Joe finds bugs, log them in BUGS.md as BUG-NNN and mirror as TASK-1NN in BACK
 - **Joe's iPhone has v0.1.1 installed.** v0.1.2 ships Phase 3: left=delete (iOS confirms), right=placeholder log (Phase 4 swaps to Immich), up=share sheet, down=skip, undo button in top-left.
 - **Build pipeline is rock solid.** ~3-5 min per CI run on macos-15. Manifest/markdown changes are in `paths-ignore` so they DON'T trigger builds.
 - **AltStore source URL** (give Joe if he ever needs it again): `https://raw.githubusercontent.com/joehill-techprojects/photo-swiper/main/altstore-source.json`
-- **AltStore source uses pinned direct URLs** (not `/releases/latest/`) so the URL stays stable across our manifest updates. The pinned tag is `v0.1.20260524180218`. Bump this when releasing Phase 3.
+- **AltStore source uses pinned direct URLs** (not `/releases/latest/`) so the URL stays stable across our manifest updates. The pinned tag is `v0.1.20260524183917` (Phase 3, 138945 bytes). Bump this when releasing Phase 4.
 
-### When shipping Phase 3 IPA
+### When shipping the next phase's IPA
 
-1. Bump `MARKETING_VERSION` in `project.yml` from `0.1.1` → `0.1.2`. Bump `CURRENT_PROJECT_VERSION` from `2` → `3`.
-2. Commit Phase 3 code. CI runs, produces new IPA with new tag.
+1. Bump `MARKETING_VERSION` in `project.yml` (e.g. `0.1.2` → `0.1.3`). Bump `CURRENT_PROJECT_VERSION` by 1.
+2. Commit phase code. CI runs, produces new IPA with new tag.
 3. Update `altstore-source.json`:
-   - Bump `version` from `0.1.1` to `0.1.2` (TWO places: app-level and inside `versions[]`)
+   - Bump app-level `version` AND prepend a new entry to `versions[]` (keep history; don't replace)
    - Update both `downloadURL` fields to the new pinned tag (look at `gh release list --limit 1` after CI completes)
    - Update `size` to new IPA byte count (`gh release view --json assets --jq '.assets[].size'`)
    - Bump `versionDate`, `versionDescription`, `localizedDescription`
