@@ -5,29 +5,36 @@
 
 ## Current phase
 
-**Phase 1 nearly done.** All file authoring committed (`536dd24`), CI green after two fixes (`448b341`, `890237b`), first IPA published as GitHub Release `v0.1.20260524153920`. **Blocked at TASK-015 on a repo-visibility decision (H-013).**
+**Phase 1 complete → Phase 2 ready to start.** Hello World launches on Joe's phone via the full pipeline. From here, every commit ships an IPA automatically; Joe just refreshes in AltStore when he wants the latest.
 
 ## Last completed task
 
-`TASK-014` — verified `PhotoSwiper.ipa` (8.6 KB) is attached to the latest GitHub Release.
+`TASK-016` — Joe confirmed PhotoSwiper installs and launches on his iPhone 2026-05-24.
 
 ## Next task
 
-`TASK-015` is **blocked** on `H-013` (repo visibility decision). AltStore can't authenticate to GitHub, so the source JSON + IPA need a public URL. Joe must either:
+**Phase 2 — Photo browsing core.** Real app work begins. Tasks fan out into mostly-independent components:
 
-- Flip the repo to public (one click, recommended — nothing sensitive in it), **OR**
-- Accept a separate public proxy-repo workaround (more work, agent will implement if Joe says no to public)
+- `TASK-021` — small Info.plist edit to add photo permission descriptions (prerequisite for everything else)
+- `TASK-022` — `PhotoFetcher` service (PhotoKit wrapper, random + chronological ordering)
+- `TASK-024` — `SwipeCard` view (single card + DragGesture)
+- `TASK-026` — `Settings` model (`@Observable`, UserDefaults-backed)
+- `TASK-023` — `PhotoFetcher` unit tests
+- `TASK-025` — `CardStack` view (deck of 2-3 SwipeCards)
+- `TASK-027` — `SettingsView` (order toggle)
+- `TASK-028` — `AppState` (wires Settings + PhotoFetcher + CardStack)
+- `TASK-029` — Joe installs and manually tests on phone
 
-Once unblocked, TASK-015 → TASK-016 (Joe installs + reports back). That closes Phase 1.
+Fan-out is genuinely valuable here: 022/024/026 are independent; 023/025/027 each depend on one of those. Recommend subagent-per-component dispatch.
 
 ## Active blockers
 
-`H-013` — repo visibility decision (Joe-only).
+None.
 
 ## High-level progress
 
 - [x] Phase 0 — Foundations
-- [~] Phase 1 — Build pipeline (TASK-001..014 done; TASK-015/016 awaiting Joe + H-013)
+- [x] Phase 1 — Build pipeline
 - [ ] Phase 2 — Photo browsing core
 - [ ] Phase 3 — Actions wired
 - [ ] Phase 4 — Immich integration
@@ -35,9 +42,11 @@ Once unblocked, TASK-015 → TASK-016 (Joe installs + reports back). That closes
 
 ## Notes for next agent
 
-- CI is now reliable on macos-15 with the subshell-cd fix.
-- Build produces `PhotoSwiper.ipa` at `https://github.com/joehill-techprojects/photo-swiper/releases/latest/download/PhotoSwiper.ipa` — that URL works once the repo is public.
-- Two new bug entries (BUG-002, BUG-003) both already fixed — kept for institutional memory.
+- Build pipeline is rock solid. `git push` → ~3 min CI → IPA in `/releases/latest/download/PhotoSwiper.ipa`.
+- Joe's phone has Wi-Fi sync enabled, so AltServer can refresh wirelessly. No more USB needed.
+- AltStore source URL: `https://raw.githubusercontent.com/joehill-techprojects/photo-swiper/main/altstore-source.json` — agents can refresh the AltStore source remotely by Joe pulling-to-refresh in the app.
+- All Phase 1 bugs (BUG-002 through BUG-006) are FIXED and kept for institutional memory.
+- For TDD: tests run on CI via `xcodebuild test`. Need to re-add the PhotoSwiperTests target to `project.yml` (was deferred in TASK-006).
 
 ## Active blockers
 
