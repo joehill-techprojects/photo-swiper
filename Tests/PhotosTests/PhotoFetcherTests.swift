@@ -107,7 +107,7 @@ final class PhotoFetcherTests: XCTestCase {
 
     // MARK: - PHFetchOptions configuration
 
-    func test_fetcherReceivesOldestFirstSortDescriptor() async {
+    func test_fetcherReceivesOldestFirstSortDescriptor() async throws {
         let capturedOptions = LockedBox<PHFetchOptions>()
         let sut = PhotoFetcher(
             fetchAssets: { options in
@@ -119,15 +119,15 @@ final class PhotoFetcherTests: XCTestCase {
 
         _ = await sut.iterator(order: .oldestFirst)
 
-        let options = try? XCTUnwrap(capturedOptions.get())
-        let descriptors = options??.sortDescriptors ?? []
+        let options = try XCTUnwrap(capturedOptions.get())
+        let descriptors = options.sortDescriptors ?? []
         XCTAssertEqual(descriptors.count, 1, "Expected exactly one sort descriptor")
         XCTAssertEqual(descriptors.first?.key, "creationDate")
         XCTAssertEqual(descriptors.first?.ascending, true,
                        "oldest-first means ascending creationDate")
     }
 
-    func test_fetcherReceivesSameSortDescriptorForRandomMode() async {
+    func test_fetcherReceivesSameSortDescriptorForRandomMode() async throws {
         // The PhotoFetcher always asks PhotoKit to sort by creationDate
         // ascending — the random shuffle happens in-memory afterward. This
         // pins that contract so a future refactor doesn't silently change
@@ -143,8 +143,8 @@ final class PhotoFetcherTests: XCTestCase {
 
         _ = await sut.iterator(order: .random)
 
-        let options = try? XCTUnwrap(capturedOptions.get())
-        XCTAssertEqual(options??.sortDescriptors?.first?.key, "creationDate")
+        let options = try XCTUnwrap(capturedOptions.get())
+        XCTAssertEqual(options.sortDescriptors?.first?.key, "creationDate")
     }
 
     // MARK: - Empty-input orchestration

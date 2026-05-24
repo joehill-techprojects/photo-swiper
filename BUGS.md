@@ -20,6 +20,15 @@
 
 ## Active bugs
 
+### BUG-007 — [P2] PhotoFetcherTests compile error: `options??` double-optional chaining
+
+- **Found in:** Wave-B CI run, 2026-05-24
+- **Cause:** Subagent wrote `let options = try? XCTUnwrap(capturedOptions.get())` followed by `options??.sortDescriptors`. `try?` produces an optional, `XCTUnwrap` returns the inner type unwrapped — but the outer `try?` re-wraps, AND `LockedBox.get()` also returns optional, so the value is doubly optional. `options??` is not valid Swift; you can't chain optional with `??` like that.
+- **Fix:** Use `try` instead of `try?` and mark the test methods `async throws`. Then `XCTUnwrap` unwraps to a non-optional. Removed the extra `?`.
+- **Status:** FIXED — commit pending.
+
+---
+
 ### BUG-006 — [P1] AltStore install fails with `NSCocoaErrorDomain 3840`: "the given data was not valid JSON"
 
 - **Found in:** TASK-015 attempt #3 (2026-05-24)
