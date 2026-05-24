@@ -17,12 +17,12 @@
       "versionDate": "2026-05-24T00:00:00-05:00",
       "versionDescription": "Phase 2: photo browsing core. Swipe actions are placeholders (Phase 3 wires real actions).",
       "downloadURL": "https://github.com/joehill-techprojects/photo-swiper/releases/latest/download/PhotoSwiper.ipa",
-      "size": 105349,
+      "size": 106669,
       "versions": [
         {
           "version": "0.1.0",
           "date": "2026-05-24T00:00:00-05:00",
-          "size": 105349,
+          "size": 106669,
           "downloadURL": "https://github.com/joehill-techprojects/photo-swiper/releases/latest/download/PhotoSwiper.ipa",
           "localizedDescription": "Phase 2: photo browsing core. Swipe through your camera roll in random or oldest-first order. Swipe actions are placeholders (no delete/upload/share yet — Phase 3)."
         }
