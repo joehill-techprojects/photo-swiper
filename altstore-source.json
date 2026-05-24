@@ -13,12 +13,19 @@
       "tintColor": "7C3AED",
       "category": "photo-video",
       "screenshotURLs": [],
-      "version": "0.1.1",
-      "versionDate": "2026-05-24T00:00:00-05:00",
-      "versionDescription": "Phase 2.1: photo browsing + permission prompt on first launch. Swipe actions are still placeholders (Phase 3 wires real actions).",
-      "downloadURL": "https://github.com/joehill-techprojects/photo-swiper/releases/download/v0.1.20260524180218/PhotoSwiper.ipa",
-      "size": 106669,
+      "version": "0.1.2",
+      "versionDate": "2026-05-24T13:35:00-05:00",
+      "versionDescription": "Phase 3: swipe actions wired. Left = delete (iOS shows its own confirmation). Up = share via Messages. Down = skip. Right = placeholder for now (real Immich upload in Phase 4). Undo button in the top-left toolbar reverses the last swipe.",
+      "downloadURL": "https://github.com/joehill-techprojects/photo-swiper/releases/download/v0.1.20260524183917/PhotoSwiper.ipa",
+      "size": 138945,
       "versions": [
+        {
+          "version": "0.1.2",
+          "date": "2026-05-24T13:35:00-05:00",
+          "size": 138945,
+          "downloadURL": "https://github.com/joehill-techprojects/photo-swiper/releases/download/v0.1.20260524183917/PhotoSwiper.ipa",
+          "localizedDescription": "Phase 3: swipe actions wired. Left = delete from device (iOS confirms first). Up = share via the system share sheet (Messages, Mail, AirDrop). Down = skip ('I'll get to it later'). Right = placeholder log (real Immich upload lands in Phase 4). New undo button in the top-left toolbar reverses the most recent swipe."
+        },
         {
           "version": "0.1.1",
           "date": "2026-05-24T00:00:00-05:00",
