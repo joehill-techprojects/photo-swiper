@@ -48,7 +48,7 @@
 - [x] **TASK-026** — Author `Sources/State/Settings.swift` — `@Observable` model backed by `UserDefaults`. *Done 2026-05-24. Codex pass-1 fix applied (immichURL load now requires http/https scheme + non-empty host).*
 - [x] **TASK-027** — Author `Sources/UI/SettingsView.swift` — toggle between random / oldest-first. *Done 2026-05-24. Form + segmented Picker + About section.*
 - [x] **TASK-028** — Author `Sources/State/AppState.swift` — wires `Settings` + `PhotoFetcher` + `CardStack`. *Done 2026-05-24. Also rewrote ContentView.swift to host the new integrated UI. BUG-008 fix landed (nil-sentinel for Settings default param).*
-- [~] **TASK-029** — Manual test: launch on Joe's phone, photos appear, can swipe through. Log any bugs in `BUGS.md`. *Awaiting Joe's test 2026-05-24.*
+- [x] **TASK-029** — Manual test: launch on Joe's phone, photos appear, can swipe through. *Done 2026-05-24. Joe confirmed deck loads, all four directions register, hints visible (red/green/blue/none), settings reload works. Phase 2 acceptance met. New feature feedback captured as TASK-038 (down = skip). Phantom AltStore update error logged as BUG-011 (non-blocking, update succeeded despite alert).*
 
 ## Phase 3 — Actions wired
 
@@ -59,7 +59,9 @@
 - [ ] **TASK-034** — Wire left-swipe in `CardStack` → `DeleteAction` + push to `UndoStack`. *Depends TASK-030, TASK-032.*
 - [ ] **TASK-035** — Wire up-swipe → `ShareAction` + push to `UndoStack`. *Depends TASK-031, TASK-032.*
 - [ ] **TASK-036** — Add undo button to the UI, wire to `UndoStack.pop`. *Depends TASK-032.*
-- [ ] **TASK-037** — Manual test: each gesture works on Joe's phone, undo works. *Depends TASK-034..036.*
+- [ ] **TASK-037** — Manual test: each gesture works on Joe's phone, undo works. *Depends TASK-034..036, TASK-038, TASK-039.*
+- [ ] **TASK-038** — Add `.down` to `SwipeCard.Direction` enum, update `directionForCommit` to detect downward swipes past threshold, add a gray "snooze" hint overlay. Wire AppState to handle `.down` as a no-op skip (just remove from deck, log skipped). Per D-022. *Depends TASK-024.*
+- [ ] **TASK-039** — Wire `.right` swipe in `AppState.handleSwipe` to a placeholder log (no real action yet — Phase 4 swaps in `ImmichClient.upload`). Card removes from deck as usual. Avoids "right does nothing visible" feeling weird in Phase 3 testing. *Depends TASK-028.*
 
 ## Phase 4 — Immich integration
 

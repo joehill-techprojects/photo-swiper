@@ -20,6 +20,22 @@
 
 ## Active bugs
 
+### BUG-011 — [P2] AltStore Classic "Update PhotoSwiper Failed: unknown tag html on line 1" — but update actually succeeds
+
+- **Found in:** TASK-029 / BUG-010 follow-up (2026-05-24)
+- **Symptom:** When updating PhotoSwiper from 0.1.0 → 0.1.1, AltStore Classic shows a modal alert with `NSCocoaErrorDomain 3840`, "Encountered unknown tag html on line 1", `kCFPropertyListOldStyleParsingError`. User dismisses the alert thinking the update failed. BUT — the update DID complete in the background (the new IPA was installed and version bumped). Joe accidentally tapped the icon after the error and the app launched as 0.1.1.
+- **Hypotheses ruled out:**
+  - Multi-hop redirects on downloadURL (tried direct release URL, same error)
+  - Source.json schema mismatch (refresh works fine, JSON parses)
+  - IPA Info.plist corruption (verified: binary plist starts with `bplist00`, fully valid)
+  - iconURL HTML redirect (tried direct avatars URL, same error)
+  - IPA contents include HTML (verified: only Info.plist + binary + PkgInfo + CodeResources, no HTML files)
+- **Suspected:** AltStore Classic's update flow does some additional plist-parsing step that the install flow skips — possibly fetching an `iTunesMetadata.plist` or other auxiliary file we don't ship, getting a GitHub 404 HTML page, and trying to parse it as plist. Need to look at AltStore Classic source code to confirm.
+- **Workaround:** Ignore the error popup — update succeeds anyway. OR delete+install fresh instead of updating.
+- **Status:** OPEN — non-blocking, Phase 3+ can proceed. Revisit if it becomes painful for Jill onboarding.
+
+---
+
 ### BUG-010 — [P1] First launch never prompts for photo permission; deck stays empty
 
 - **Found in:** TASK-029 (Joe's manual test, 2026-05-24)

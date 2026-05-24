@@ -93,3 +93,17 @@ Immich's `/api/asset/upload` endpoint already deduplicates by SHA1. We trust tha
 ### D-020 — Age threshold for "old enough to also delete": 365 days
 
 Exactly one calendar year before today, in the device's local timezone. User-configurable later if anyone cares.
+
+---
+
+## 2026-05-24 — Phase 2 retrospective decisions
+
+### D-022 — Down swipe = "skip / I'll get to it later" (no action)
+
+Joe added this during Phase 2 manual testing. Pre-D-022 behavior was "down swipe is treated as cancel (card springs back)." New behavior: down swipe past threshold is a fourth swipe action that just discards the card from the deck without performing any side effect — leaves the photo on the device, doesn't upload, doesn't share.
+
+Implementation in TASK-038: extend `SwipeCard.Direction` enum with `.down`, update `directionForCommit`, add gray clock/snooze hint overlay, wire AppState.handleSwipe to handle `.down` as a no-op log+remove-from-deck.
+
+### D-023 — Right swipe in Phase 3 = placeholder log (no real upload)
+
+`ImmichClient.upload` lands in Phase 4. Until then, right swipe in Phase 3 mirrors down — log "would upload" and remove from deck — rather than leaving right swipe as a silent no-op. Otherwise testing Phase 3 with three different-feeling directions (left destructive, up shares, right & down silent) is unnecessarily confusing.

@@ -5,25 +5,47 @@
 
 ## Current phase
 
-**Phase 2 complete → awaiting Joe's manual test on phone.** All code shipped through CI (final build `ac9160c`, IPA in latest GitHub Release).
+**Phase 2 complete (TASK-029 done) → Phase 3 ready to start.** Joe's manual test passed: deck loads, swipes register, hints render, settings reload, photo permission prompt fires per BUG-010 fix.
 
 ## Last completed task
 
-`TASK-028` — AppState integration + ContentView rewrite. CI green after fixes for BUG-007 (test syntax) and BUG-008 (main-actor isolation default param).
+`TASK-029` — Joe ran through the full Phase 2 flow on his iPhone and confirmed acceptance. New feedback: down swipe should be "skip" (D-022, TASK-038).
 
 ## Next task
 
-`TASK-029` — Joe opens AltStore, refreshes "Joe's Personal Apps" source, installs/updates PhotoSwiper, launches, runs through:
-- iOS shows photo permission prompt → Allow Access to All Photos
-- Photos appear in a swipeable deck (no actions wired yet — Phase 3)
-- Drag left/right/up and see the colored hint overlays; release past threshold flies the card off, deck shifts up
-- Tap the gear icon (top right) → Settings sheet, toggle between Random and Oldest first, dismiss → deck reloads in new order
+**Phase 3 — Actions wired.** Subagent fan-out plan:
 
-After Joe reports back with anything broken, fix → Phase 3 (wire delete/share/undo to those swipes).
+1. **Inline prep:** TASK-038 (extend Direction enum with `.down`, update SwipeCard hint overlay + gesture detection)
+2. **Wave A (parallel, independent files):**
+   - TASK-030 — `Sources/Actions/DeleteAction.swift` (PHAssetChangeRequest deletion with iOS confirmation)
+   - TASK-031 — `Sources/Actions/ShareAction.swift` (UIActivityViewController, Messages preselected)
+   - TASK-032 — `Sources/State/UndoStack.swift` (bounded LIFO with reverse-action closures)
+3. **Wave B (parallel):**
+   - TASK-033 — `Tests/StateTests/UndoStackTests.swift`
+4. **Inline integration:** TASK-034 + TASK-035 + TASK-036 + TASK-038 part 2 + TASK-039 — all touch AppState/ContentView, single subagent
+5. **Push, CI, fix**
+6. **TASK-037** — Joe tests on phone
+
+After Phase 3: left swipe deletes (iOS confirms), up swipe shares (Messages), down swipe skips, right swipe placeholder (real upload in Phase 4), undo button works.
 
 ## Active blockers
 
-`TASK-029` — Joe-only manual test.
+None.
+
+## High-level progress
+
+- [x] Phase 0 — Foundations
+- [x] Phase 1 — Build pipeline
+- [x] Phase 2 — Photo browsing core
+- [ ] Phase 3 — Actions wired (next)
+- [ ] Phase 4 — Immich integration
+- [ ] Phase 5 — Polish & rollout
+
+## Notes for next agent
+
+- Phase 2 surfaced two non-blocking issues: BUG-010 (fixed; first-launch permission prompt added to AppState.loadInitial) and BUG-011 (open; AltStore update flow shows a phantom error popup but update succeeds anyway).
+- D-022 (down = skip) and D-023 (right = placeholder in Phase 3) added.
+- App at 0.1.1 on Joe's phone. Bump to 0.1.2 in project.yml + altstore-source.json when shipping Phase 3.
 
 ## High-level progress
 
