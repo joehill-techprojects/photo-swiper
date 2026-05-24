@@ -20,6 +20,17 @@
 
 ## Active bugs
 
+### BUG-003 — [P1] CI Package step fails: `ls: build/PhotoSwiper.ipa: No such file or directory`
+
+- **Found in:** TASK-013 (second CI run, 2026-05-24)
+- **Repro:** Build → `Archive` step succeeds → `Package unsigned IPA` step fails.
+- **Cause:** Heredoc shell script ran `cd build && zip ...` then `ls -lh build/PhotoSwiper.ipa`. The `cd` persists across lines in a `run: |` block, so the final `ls` looked at `build/build/...` instead of `build/...`.
+- **Fix:** Wrap the `cd build && zip ...` in a subshell `(...)` so cwd reverts.
+- **Status:** FIXED — commit pending.
+- **Silver lining:** Confirms Xcode 16 on macos-15 successfully compiled and archived the app. BUG-002 fix is good.
+
+---
+
 ### BUG-002 — [P1] CI build fails: "future Xcode project file format (77)"
 
 - **Found in:** TASK-013 (first CI run, 2026-05-24)

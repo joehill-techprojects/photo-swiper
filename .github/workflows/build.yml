@@ -39,7 +39,7 @@ jobs:
         run: |
           mkdir -p build/Payload
           cp -R build/PhotoSwiper.xcarchive/Products/Applications/PhotoSwiper.app build/Payload/
-          cd build && zip -qr PhotoSwiper.ipa Payload
+          (cd build && zip -qr PhotoSwiper.ipa Payload)
           ls -lh build/PhotoSwiper.ipa
 
       - name: Upload IPA artifact
