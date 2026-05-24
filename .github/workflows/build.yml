@@ -24,6 +24,14 @@ jobs:
       - name: Generate xcodeproj
         run: xcodegen generate
 
+      - name: Run unit tests on simulator
+        run: |
+          xcodebuild test \
+            -project PhotoSwiper.xcodeproj \
+            -scheme PhotoSwiper \
+            -destination 'platform=iOS Simulator,name=iPhone 16,OS=latest' \
+            CODE_SIGNING_ALLOWED=NO
+
       - name: Build for device (unsigned)
         run: |
           xcodebuild build \

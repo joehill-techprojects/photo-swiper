@@ -26,5 +26,9 @@
   </array>
   <key>LSRequiresIPhoneOS</key>
   <true/>
+  <key>NSPhotoLibraryUsageDescription</key>
+  <string>PhotoSwiper needs access to show and curate your photos.</string>
+  <key>NSPhotoLibraryAddUsageDescription</key>
+  <string>Save photos back to your library after editing.</string>
 </dict>
 </plist>
