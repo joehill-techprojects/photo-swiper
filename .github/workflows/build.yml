@@ -24,23 +24,36 @@ jobs:
       - name: Generate xcodeproj
         run: xcodegen generate
 
-      - name: Archive for device (ad-hoc signed)
+      - name: Build for device (unsigned)
         run: |
-          xcodebuild archive \
+          xcodebuild build \
             -project PhotoSwiper.xcodeproj \
             -scheme PhotoSwiper \
-            -archivePath build/PhotoSwiper.xcarchive \
+            -configuration Release \
+            -sdk iphoneos \
+            -derivedDataPath build/DerivedData \
             -destination 'generic/platform=iOS' \
-            CODE_SIGN_IDENTITY="-" \
+            CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_ALLOWED=YES
+            CODE_SIGN_IDENTITY=""
 
-      - name: Package unsigned IPA
+      - name: Ad-hoc sign the .app post-build
+        run: |
+          APP=build/DerivedData/Build/Products/Release-iphoneos/PhotoSwiper.app
+          ls -lh "$APP"
+          codesign --force --sign - --timestamp=none --deep "$APP"
+          echo "--- codesign verification ---"
+          codesign -dv "$APP" 2>&1 || true
+          codesign --verify --verbose=2 "$APP"
+
+      - name: Package signed IPA
         run: |
           mkdir -p build/Payload
-          cp -R build/PhotoSwiper.xcarchive/Products/Applications/PhotoSwiper.app build/Payload/
+          cp -R build/DerivedData/Build/Products/Release-iphoneos/PhotoSwiper.app build/Payload/
           (cd build && zip -qr PhotoSwiper.ipa Payload)
           ls -lh build/PhotoSwiper.ipa
+          echo "--- IPA contents ---"
+          unzip -l build/PhotoSwiper.ipa
 
       - name: Upload IPA artifact
         uses: actions/upload-artifact@v4

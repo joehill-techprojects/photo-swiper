@@ -20,6 +20,16 @@
 
 ## Active bugs
 
+### BUG-005 — [P1] xcodebuild archive rejects `CODE_SIGN_IDENTITY="-"`: "Ad Hoc code signing is not allowed with SDK 'iOS 18.5'"
+
+- **Found in:** TASK-015, attempt #2 (2026-05-24)
+- **Cause:** Apple tightened iOS 18 SDK to disallow ad-hoc signing during `xcodebuild archive`. The `-` identity used to work; on Xcode 16 + iOS 18 SDK it errors out at `ARCHIVE FAILED`.
+- **Fix path that doesn't work:** ad-hoc at archive time (this bug).
+- **Fix path that does work:** build unsigned with `xcodebuild build` (no archive), then ad-hoc sign post-build using the standalone `codesign --force --sign -` tool. The standalone tool bypasses the SDK-level check because it doesn't go through Xcode's build system.
+- **Status:** FIXED — workflow restructured to build → codesign → package.
+
+---
+
 ### BUG-004 — [P1] AltStore rejects IPA: "The data couldn't be read because it isn't in the correct format"
 
 - **Found in:** TASK-015 (Joe's first install attempt, 2026-05-24)
