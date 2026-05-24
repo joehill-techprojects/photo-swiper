@@ -5,26 +5,39 @@
 
 ## Current phase
 
-**Phase 0 complete → Phase 1 ready to start.** All Joe-blocked setup landed 2026-05-24. Scaffold committed (`e664014`) and pushed to `origin/main`.
+**Phase 1 nearly done.** All file authoring committed (`536dd24`), CI green after two fixes (`448b341`, `890237b`), first IPA published as GitHub Release `v0.1.20260524153920`. **Blocked at TASK-015 on a repo-visibility decision (H-013).**
 
 ## Last completed task
 
-`TASK-002` — pushed scaffold commit `e664014` to `https://github.com/joehill-techprojects/photo-swiper` on `main`. TASK-001 and TASK-002 both done.
+`TASK-014` — verified `PhotoSwiper.ipa` (8.6 KB) is attached to the latest GitHub Release.
 
 ## Next task
 
-**Phase 1 file-authoring batch** (all small, all documented in `docs/plan.md`):
+`TASK-015` is **blocked** on `H-013` (repo visibility decision). AltStore can't authenticate to GitHub, so the source JSON + IPA need a public URL. Joe must either:
 
-1. `TASK-003` — flesh out `docs/setup-guide.md` with AltServer/AltStore walkthrough + iTunes nag + Developer Mode gotchas (now that we have first-hand evidence of all of them)
-2. `TASK-006` — write `project.yml` (XcodeGen spec)
-3. `TASK-007` — write `Sources/App/Info.plist`
-4. `TASK-008` — write `Sources/App/PhotoSwiperApp.swift`
-5. `TASK-009` — write `Sources/App/ContentView.swift`
-6. `TASK-010` — write `.github/workflows/build.yml` (CI build + release-on-main)
-7. `TASK-012` — write `altstore-source.json` (substituted with `joehill-techprojects/photo-swiper`)
-8. `TASK-013` — commit, push, watch CI go green (iterate on failures)
+- Flip the repo to public (one click, recommended — nothing sensitive in it), **OR**
+- Accept a separate public proxy-repo workaround (more work, agent will implement if Joe says no to public)
 
-Then `TASK-014` (verify IPA in Release) and `TASK-015` (Joe adds source URL to AltStore on phone, installs Hello World, reports back).
+Once unblocked, TASK-015 → TASK-016 (Joe installs + reports back). That closes Phase 1.
+
+## Active blockers
+
+`H-013` — repo visibility decision (Joe-only).
+
+## High-level progress
+
+- [x] Phase 0 — Foundations
+- [~] Phase 1 — Build pipeline (TASK-001..014 done; TASK-015/016 awaiting Joe + H-013)
+- [ ] Phase 2 — Photo browsing core
+- [ ] Phase 3 — Actions wired
+- [ ] Phase 4 — Immich integration
+- [ ] Phase 5 — Polish & rollout
+
+## Notes for next agent
+
+- CI is now reliable on macos-15 with the subshell-cd fix.
+- Build produces `PhotoSwiper.ipa` at `https://github.com/joehill-techprojects/photo-swiper/releases/latest/download/PhotoSwiper.ipa` — that URL works once the repo is public.
+- Two new bug entries (BUG-002, BUG-003) both already fixed — kept for institutional memory.
 
 ## Active blockers
 

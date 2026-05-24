@@ -40,7 +40,8 @@
 
 ## During development (Joe-blocking moments to expect)
 
-- [ ] **H-020** — Test the first Hello World IPA. Agent will tell Joe: "open AltStore, tap the source, install PhotoSwiper, then launch it. Tell me what you see." *Triggered by: TASK-020*
+- [ ] **H-013** — **Decide repo visibility.** Phase 1 just discovered AltStore can't authenticate to GitHub, so the source JSON + IPA must be on a public URL. Easiest path: flip `joehill-techprojects/photo-swiper` to public via GitHub Settings → General → Danger Zone → Change repository visibility. Nothing sensitive in the repo (no secrets, the Immich URL is a private LAN IP that's useless externally). Alternative is a separate public proxy repo (more work). *Blocks: TASK-015.*
+- [ ] **H-020** — Test the first Hello World IPA. Agent will tell Joe: "open AltStore, tap the source, install PhotoSwiper, then launch it. Tell me what you see." *Triggered by: TASK-015.*
 - [ ] **H-021** — Confirm Immich URL + generate an API key on the Immich web UI. Paste both into the agent's chat. *Triggered by: TASK-040*
 - [ ] **H-022** — Manual testing of the full swipe loop on Joe's phone before Jill onboards. *Triggered by: TASK-065*
 

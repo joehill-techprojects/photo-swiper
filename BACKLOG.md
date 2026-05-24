@@ -33,9 +33,9 @@
 - [x] **TASK-010** — Write `.github/workflows/build.yml` — installs XcodeGen, generates project, runs `xcodebuild archive`, produces unsigned `.ipa`, uploads as workflow artifact, AND creates GitHub Release on push to main (folded TASK-011 into here per plan note). *Done 2026-05-24.*
 - [x] **TASK-011** — ~~Separate release.yml~~ folded into `build.yml` per plan, no separate file. *Done 2026-05-24.*
 - [x] **TASK-012** — Write `altstore-source.json` — AltStore source manifest pointing at GitHub Releases. *Done 2026-05-24. URLs use joehill-techprojects/photo-swiper. iconURL points at future asset path (will 404 until TASK-060 lands the real icon — AltStore tolerates this).*
-- [~] **TASK-013** — First push, watch CI go green. Iterate on TASK-010 until success. *In progress: pushing now.*
-- [ ] **TASK-014** — Verify IPA downloads correctly from the latest GitHub Release URL. *Depends TASK-013.*
-- [ ] **TASK-015** — Tell Joe (via HUMAN-TODO H-020): add `altstore-source.json` URL to AltStore on phone, install PhotoSwiper, launch it. *Depends TASK-005, TASK-014.*
+- [x] **TASK-013** — First push, watch CI go green. *Done 2026-05-24, commit `890237b`. Two CI failures before success: BUG-002 (macos-14 Xcode 15.4 too old for XcodeGen objectVersion 77 → bumped to macos-15), BUG-003 (cd persistence in heredoc broke ls path → subshell fix).*
+- [x] **TASK-014** — Verify IPA downloads correctly from the latest GitHub Release URL. *Done 2026-05-24. Release `v0.1.20260524153920` has `PhotoSwiper.ipa` attached, 8599 bytes (expected for Hello World).*
+- [!] **TASK-015** — Tell Joe (via HUMAN-TODO H-020): add `altstore-source.json` URL to AltStore on phone, install PhotoSwiper, launch it. *Blocked on H-013: repo is private, AltStore can't auth to GitHub. Joe must either flip repo to public or accept hosting workaround.*
 - [ ] **TASK-016** — Confirm Hello-World launches on Joe's phone (Joe reports back). *Depends TASK-015.*
 
 ## Phase 2 — Photo browsing core
