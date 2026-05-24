@@ -20,6 +20,17 @@
 
 ## Active bugs
 
+### BUG-002 — [P1] CI build fails: "future Xcode project file format (77)"
+
+- **Found in:** TASK-013 (first CI run, 2026-05-24)
+- **Repro:** Push to main → `Build / Archive for device (unsigned)` step fails after ~19s.
+- **Error:** `xcodebuild: error: Unable to read project 'PhotoSwiper.xcodeproj'. Reason: The project 'PhotoSwiper' cannot be opened because it is in a future Xcode project file format (77).`
+- **Cause:** Homebrew's current XcodeGen emits projects in objectVersion 77 (Xcode 16 format), but the `macos-14` GitHub runner ships Xcode 15.4 which only reads up to objectVersion 56.
+- **Fix:** Switched runner to `macos-15` (ships Xcode 16+) in commit (next push).
+- **Status:** FIXED — `.github/workflows/build.yml` runner bumped to macos-15.
+
+---
+
 ### BUG-001 — [P3] AltServer prompts for iTunes directory on every launch
 
 - **Found in:** TASK-004 (setup, 2026-05-24)
