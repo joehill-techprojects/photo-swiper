@@ -1,0 +1,28 @@
+# Xcode generated
+*.xcodeproj/
+*.xcworkspace/
+DerivedData/
+build/
+*.ipa
+*.dSYM.zip
+*.dSYM/
+
+# Swift Package Manager
+.build/
+Packages/
+Package.resolved
+xcuserdata/
+
+# macOS
+.DS_Store
+
+# AltStore artifacts (we publish via GitHub Releases, not committed)
+*.altsource
+
+# Editor
+.vscode/
+.idea/
+
+# Secrets — should never appear, but belt and suspenders
+*.env
+secrets.json
